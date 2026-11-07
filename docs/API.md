@@ -49,3 +49,7 @@ All paths below have `/api/v1` prefix.
 `GET /health` is public and minimal. `GET /status`, `/capabilities`, `/versions` require sessions. `GET /admin/engine`, `/admin/storage`, `/admin/settings` and `PATCH /admin/settings {concurrency,retention_hours}` require administrator sessions. No dependency update endpoint pretends to install packages: updates are explicit image rebuild/rollback operations.
 
 `GET/POST /presets` lists or persists named typed selections. Preset editing UI is not implemented.
+
+## Application update metadata
+
+`GET /updates?version=0.1.0&build=1&channel=stable&variant=extended&os_version=17.0` requires a device session and returns explicit status, check timestamp and a compatible published candidate when available. Private GitHub credentials stay on the server. See features/UPDATES.md for cache, compatibility and current validation limits.

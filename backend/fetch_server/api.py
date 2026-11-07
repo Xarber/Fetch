@@ -354,5 +354,11 @@ def updates(version:str='0.1.0',build:int=1,channel:str='stable',variant:str='ex
     if channel not in ('stable','beta') or variant not in ('extended','store'):raise HTTPException(422,'Unsupported release channel or variant')
     return check_updates(version,build,channel,variant,os_version)
 
+@app.get('/api/v1/source')
+def corresponding_source(d=Depends(device)):
+    archive=Path(os.getenv('FETCH_SOURCE_ARCHIVE',str(DATA/'fetch-source.tar.gz')))
+    if not archive.is_file():raise HTTPException(503,'Source archive not prepared. Run scripts/package_source.py for the deployed revision.')
+    return FileResponse(archive,filename='Fetch-corresponding-source.tar.gz',media_type='application/gzip')
+
 web = Path(os.getenv('FETCH_WEB',str(Path(__file__).resolve().parents[2]/'web')))
 if web.is_dir(): app.mount('/',StaticFiles(directory=web,html=True),name='dashboard')

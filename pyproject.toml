@@ -11,5 +11,6 @@ dependencies = ["fastapi>=0.115,<1", "uvicorn>=0.34,<1", "yt-dlp[default]", "arg
 test = ["pytest>=8,<10", "httpx>=0.28,<1"]
 [tool.setuptools.packages.find]
 where = ["backend"]
+namespaces = false
 [tool.pytest.ini_options]
 testpaths = ["backend/tests"]

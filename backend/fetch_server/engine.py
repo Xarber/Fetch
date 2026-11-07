@@ -136,6 +136,7 @@ def download(job_id):
                 yield from selected(safe_context)
             ydl.params['format'] = choose
             info = ydl.extract_info(row['url'], download=True)
+        transition(job_id,'postprocessing',progress=json.dumps({'stage':'Validating and finalizing media'}))
         outputs = [p for p in folder.glob('source.*') if p.suffix.lower() in ('.mp4','.mkv','.webm','.m4a','.mp3','.opus','.ogg','.flac','.wav','.mov','.aac')]
         if len(outputs) != 1: raise ValueError('Expected one finalized media artifact')
         output = outputs[0]

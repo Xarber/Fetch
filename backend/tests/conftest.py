@@ -3,6 +3,7 @@ import functools
 import os
 import subprocess
 import tempfile
+import shutil
 import threading
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
@@ -38,6 +39,8 @@ def client():
     from fetch_server.api import app
     with TestClient(app) as c: yield c
     server.shutdown()
+    server.server_close()
+    shutil.rmtree(ROOT,ignore_errors=True)
 
 @pytest.fixture(scope='session')
 def auth(client):

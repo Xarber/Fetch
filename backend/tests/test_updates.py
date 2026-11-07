@@ -33,3 +33,8 @@ def test_updates_route_authentication_and_unconfigured_state(client,auth,monkeyp
     assert response.status_code==200
     assert response.json()['status']=='unconfigured'
     assert client.get('/api/v1/updates?channel=unknown',headers=auth).status_code==422
+
+def test_source_offer_does_not_expose_unprepared_paths(client,auth,monkeypatch,tmp_path):
+    monkeypatch.setenv('FETCH_SOURCE_ARCHIVE',str(tmp_path/'missing.tar.gz'))
+    assert client.get('/api/v1/source').status_code==401
+    assert client.get('/api/v1/source',headers=auth).status_code==503
