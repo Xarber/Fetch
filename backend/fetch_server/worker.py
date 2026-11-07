@@ -64,7 +64,7 @@ def run():
                         db.execute("UPDATE jobs SET state='downloading',running=1,updated=?,version=version+1,error=NULL WHERE id=?",(now,row['id']))
                 for row in pending:
                     # close_fds prevents child inheriting the singleton worker lock.
-                    proc = subprocess.Popen([sys.executable,'-m','fetch_server.engine','download',row['id']],start_new_session=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,close_fds=True)
+                    proc = subprocess.Popen([sys.executable,'-m','fetch_server.engine','download',row['id']],start_new_session=True,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,close_fds=True,env={**os.environ,'FETCH_PARENT_PID':str(os.getpid())})
                     active[row['id']] = (proc,now)
             cutoff = now-int(settings.get('retention_hours',RETENTION))*3600
             with connect() as db:

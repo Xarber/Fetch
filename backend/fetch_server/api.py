@@ -196,7 +196,7 @@ async def inspect(body:Inspect,d=Depends(device)):
         inspection_slots.release()
 
 async def run_inspection(body,d):
-    process = await asyncio.create_subprocess_exec(sys.executable,'-m','fetch_server.engine','inspect',body.url,stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.DEVNULL,start_new_session=True)
+    process = await asyncio.create_subprocess_exec(sys.executable,'-m','fetch_server.engine','inspect',body.url,stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.DEVNULL,start_new_session=True,env={**os.environ,'FETCH_PARENT_PID':str(os.getpid())})
     try:
         stdout,_ = await asyncio.wait_for(process.communicate(),60)
         result=json.loads(stdout)

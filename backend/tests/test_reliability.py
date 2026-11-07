@@ -119,3 +119,15 @@ def test_oversized_download_fails_without_artifact(client,auth,media_url):
         assert client.post('/api/v1/downloads/'+ident+'/transfer',headers=auth).status_code==409
     finally:worker.terminate();worker.wait(timeout=10)
     assert client.delete('/api/v1/downloads/'+ident,headers=auth).status_code==204
+
+@pytest.mark.parametrize('source',['https://example.com/video','rtmp://example.com/live','file:///etc/passwd','concat:http://127.0.0.1/internal'])
+def test_ffmpeg_remote_fallback_is_blocked(source,tmp_path):
+    from fetch_server.ffmpeg_guard import guarded_arguments
+    with pytest.raises(ValueError):guarded_arguments('ffmpeg',['-i',source,'out.mp4'],tmp_path)
+
+def test_ffmpeg_cannot_override_local_protocol_policy(tmp_path):
+    from fetch_server.ffmpeg_guard import guarded_arguments
+    media=tmp_path/'source.mp4'
+    args=guarded_arguments('ffmpeg',['-protocol_whitelist','http,https,tcp','-i',str(media),'out.mp4'],tmp_path)
+    assert 'http,https,tcp' not in args
+    assert args[:3]==['-protocol_whitelist','file,pipe,crypto,data','-i']

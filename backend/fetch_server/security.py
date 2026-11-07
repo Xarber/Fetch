@@ -43,7 +43,7 @@ def resolve(host, port):
     result = []
     for family, _, _, _, address in addresses:
         ip = ipaddress.ip_address(address[0])
-        if not ip.is_global or ip.is_multicast or (ip.version == 6 and ip.ipv4_mapped and not ip.ipv4_mapped.is_global):
+        if not ip.is_global or ip.is_reserved or ip.is_multicast or (ip.version == 6 and any(ip in ipaddress.ip_network(network) for network in ('64:ff9b::/96','64:ff9b:1::/48','2002::/16','2001::/32'))) or (ip.version == 6 and ip.ipv4_mapped and not ip.ipv4_mapped.is_global):
             raise UnsafeURL('Private, reserved and internal network destinations are blocked')
         result.append((str(ip), family))
     if not result:

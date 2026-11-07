@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-"""Short-lived, supervised extraction/download process. No shell or user arguments."""
+"""Short-lived, supervised extraction/download process. No untrusted shell input or arbitrary user arguments."""
 import hashlib
 import json
 import os
@@ -8,6 +8,9 @@ import time
 import threading
 import signal
 import subprocess
+import fcntl
+import shutil
+import shlex
 from pathlib import Path
 from .config import DATA, MAX_BYTES
 from .db import connect, transition
@@ -17,7 +20,8 @@ from .security import start_proxy, validate_url
 os.environ["YTDLP_NO_PLUGINS"] = "1"
 
 def supervise_parent():
-    parent = os.getppid()
+    parent = int(os.environ.get('FETCH_PARENT_PID',os.getppid()))
+    if os.getppid() != parent: os.killpg(os.getpgrp(),signal.SIGKILL)
     def watch():
         while True:
             time.sleep(.25)
@@ -82,6 +86,20 @@ def download(job_id):
     selection = json.loads(row['selection'])
     folder = DATA / 'jobs' / job_id
     folder.mkdir(parents=True,exist_ok=True)
+    job_lock = (folder/'engine.lock').open('w')
+    fcntl.flock(job_lock,fcntl.LOCK_EX)
+    with connect() as db:
+        current = db.execute('SELECT state FROM jobs WHERE id=?',(job_id,)).fetchone()
+    if not current or current['state'] != 'downloading': return
+    guarded = folder/'bin'; guarded.mkdir(exist_ok=True)
+    os.environ['FETCH_JOB_DIR'] = str(folder)
+    for tool in ('ffmpeg','ffprobe'):
+        binary = shutil.which(tool)
+        if not binary: raise ValueError('Required media tool missing')
+        os.environ['FETCH_REAL_'+tool.upper()] = binary
+        wrapper = guarded/tool
+        wrapper.write_text('#!/bin/sh\nexec '+shlex.quote(sys.executable)+' -m fetch_server.ffmpeg_guard '+tool+' "$@"\n')
+        wrapper.chmod(0o700)
     server, proxy = start_proxy()
     last = 0
     def progress(d):
@@ -96,7 +114,7 @@ def download(job_id):
     def post(d):
         transition(job_id,'postprocessing',progress=json.dumps({'stage':d.get('postprocessor','Processing')}))
     opts = options(proxy)
-    opts.update(format=selector(selection),outtmpl=str(folder/'source.%(ext)s'),
+    opts.update(ffmpeg_location=str(guarded),format=selector(selection),outtmpl=str(folder/'source.%(ext)s'),
                 progress_hooks=[progress],postprocessor_hooks=[post],
                 merge_output_format='mkv' if selection['preset'] in ('best','original') else 'mp4',
                 writesubtitles=selection['subtitles'],subtitleslangs=['en'],
@@ -111,6 +129,12 @@ def download(job_id):
         opts['postprocessors'].append({'key':'FFmpegEmbedSubtitle'})
     try:
         with yt_dlp.YoutubeDL(opts) as ydl:
+            selected = ydl.build_format_selector(selector(selection))
+            def choose(context):
+                safe_context = dict(context)
+                safe_context['formats'] = [f for f in context['formats'] if not f.get('has_drm') and f.get('protocol') in ('http','https','m3u8_native','http_dash_segments')]
+                yield from selected(safe_context)
+            ydl.params['format'] = choose
             info = ydl.extract_info(row['url'], download=True)
         outputs = [p for p in folder.glob('source.*') if p.suffix.lower() in ('.mp4','.mkv','.webm','.m4a','.mp3','.opus','.ogg','.flac','.wav','.mov','.aac')]
         if len(outputs) != 1: raise ValueError('Expected one finalized media artifact')
