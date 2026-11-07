@@ -346,5 +346,13 @@ def settings(body:Settings,d=Depends(admin)):
         for k,v in body.model_dump().items(): db.execute('INSERT OR REPLACE INTO settings VALUES(?,?)',(k,json.dumps(v)))
     return body
 
+@app.get('/api/v1/updates')
+def updates(version:str='0.1.0',build:int=1,channel:str='stable',variant:str='extended',os_version:str='17.0',d=Depends(device)):
+    from .updates import check_updates,version_key
+    try: version_key(version,build)
+    except ValueError: raise HTTPException(422,'Invalid installed version/build')
+    if channel not in ('stable','beta') or variant not in ('extended','store'):raise HTTPException(422,'Unsupported release channel or variant')
+    return check_updates(version,build,channel,variant,os_version)
+
 web = Path(os.getenv('FETCH_WEB',str(Path(__file__).resolve().parents[2]/'web')))
 if web.is_dir(): app.mount('/',StaticFiles(directory=web,html=True),name='dashboard')
