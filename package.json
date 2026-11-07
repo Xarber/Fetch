@@ -1,0 +1,17 @@
+{
+  "name": "openrecode-fetch-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "license": "AGPL-3.0-only",
+  "scripts": {
+    "build": "node scripts/build_web.mjs",
+    "check": "tsc --noEmit",
+    "test:browser": "playwright test",
+    "branding": "node scripts/export_branding.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.1",
+    "sharp": "^0.35.5",
+    "typescript": "~5.9.3"
+  }
+}

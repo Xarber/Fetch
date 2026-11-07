@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="640" viewBox="0 0 1600 640">
+<defs><linearGradient id="brand" x2="1" y2="1"><stop stop-color="#8287ff"/><stop offset="1" stop-color="#535ae1"/></linearGradient></defs>
+<g id="background"><rect width="1600" height="640" fill="#f7f8fb"/><circle cx="1390" cy="100" r="350" fill="#6269f5" opacity=".045"/></g>
+<g id="icon"><rect x="110" y="180" width="260" height="260" rx="60" fill="url(#brand)"/><g fill="none" stroke="white" stroke-linecap="round" stroke-linejoin="round"><path stroke-width="18" d="M240 246V333M203 298L240 335 277 298"/><path stroke-width="16" d="M181 342V356Q181 371 196 371H284Q299 371 299 356V342"/></g></g>
+<g id="wordmark" font-family="Arial, Helvetica, sans-serif"><text x="438" y="292" font-size="112" font-weight="700" letter-spacing="-6" fill="#242638">fetch<tspan fill="#6269f5">.</tspan></text><text x="444" y="361" font-size="31" fill="#818393">Your media. Your device. Your control.</text><text x="444" y="423" font-size="16" letter-spacing="5" fill="#6269f5">OPENRECODE</text></g>
+</svg>
