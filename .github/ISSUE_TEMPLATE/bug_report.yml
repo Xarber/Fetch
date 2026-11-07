@@ -1,0 +1,24 @@
+name: Bug report
+description: Report a reproducible Fetch problem without private URLs or credentials.
+body:
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction steps with an authorized non-sensitive fixture
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: App, server and engine versions
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Sanitized diagnostics
+      description: Never attach tokens, cookies, credentials, private URLs or personal media.
