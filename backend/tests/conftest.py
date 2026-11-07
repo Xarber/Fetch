@@ -49,3 +49,8 @@ def auth(client):
 
 @pytest.fixture(scope='session')
 def media_url(): return f'http://127.0.0.1:{server.server_port}/authorized.mp4'
+
+@pytest.fixture(scope='session')
+def incompatible_media_url():
+    subprocess.run(['ffmpeg','-nostdin','-hide_banner','-loglevel','error','-i',str(MEDIA/'authorized.mp4'),'-c:v','mpeg4','-c:a','libmp3lame',str(MEDIA/'legacy.mp4')],check=True)
+    return f'http://127.0.0.1:{server.server_port}/legacy.mp4'

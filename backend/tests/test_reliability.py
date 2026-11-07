@@ -131,3 +131,25 @@ def test_ffmpeg_cannot_override_local_protocol_policy(tmp_path):
     args=guarded_arguments('ffmpeg',['-protocol_whitelist','http,https,tcp','-i',str(media),'out.mp4'],tmp_path)
     assert 'http,https,tcp' not in args
     assert args[:3]==['-protocol_whitelist','file,pipe,crypto,data','-i']
+
+def test_compatible_video_actually_transcodes(client,auth,incompatible_media_url,tmp_path):
+    info=client.post('/api/v1/media/inspect',headers=auth,json={'url':incompatible_media_url}).json()
+    response=client.post('/api/v1/downloads',headers=auth,json={'inspection_id':info['id'],'authorized':True,'request_key':str(uuid.uuid4()),'selection':{'preset':'compatible'}})
+    assert response.status_code==201,response.text
+    ident=response.json()['id']
+    worker=subprocess.Popen([sys.executable,'-m','fetch_server.worker'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+    try:
+        deadline=time.monotonic()+25
+        while time.monotonic()<deadline:
+            job=client.get('/api/v1/downloads/'+ident,headers=auth).json()
+            if job['state'] in ('ready','failed') and not job['running']:break
+            time.sleep(.2)
+        assert job['state']=='ready',job
+        ticket=client.post('/api/v1/downloads/'+ident+'/transfer',headers=auth).json()
+        payload=client.get(ticket['path'],headers={'Authorization':'Bearer '+ticket['token']})
+        assert payload.status_code==200
+        output=tmp_path/'compatible.mp4';output.write_bytes(payload.content)
+        probe=json.loads(subprocess.check_output(['ffprobe','-v','error','-show_streams','-of','json',str(output)],text=True))
+        assert {s['codec_name'] for s in probe['streams']}=={'h264','aac'}
+    finally:worker.terminate();worker.wait(timeout=10)
+    assert client.delete('/api/v1/downloads/'+ident,headers=auth).status_code==204
