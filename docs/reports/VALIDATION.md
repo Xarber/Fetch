@@ -49,3 +49,7 @@ Update tests exercise structured metadata rules and an unconfigured real API, no
 ## Artifacts and next gates
 
 The browser screenshots show generated isolated QA media, never native UI or personal download history. Source, commands and prepared workflows are in the private OpenRecode-Fetch repository. beta/main contain the governance baseline; development belongs on testing. Native SDK compilation/device lifecycle and Docker/TLS/egress staging are the next required verification gates. Remaining requested features are explicitly listed in ROADMAP.md.
+
+## Git handoff
+
+The validated implementation snapshot is `b1785132d7ed582348ae5e91b73eb4e4c3b728c1`. Development was pushed to `testing` in private `Xarber/OpenRecode-Fetch`; `main` and `beta` remain at the governance baseline `5b21f96`. The existing public `Xarber/Fetch` was not changed. The working tree was clean, no temporary branch/worktree was created, and no native build/release run was started. Commits were unsigned because the configured hardware signing key was not connected; its configuration was not changed.
