@@ -251,6 +251,7 @@ struct UpdatesView:View {
                 Toggle("Check automatically",isOn:$automatic)
                 if let date=store.updates.lastSuccessfulCheck { LabeledContent("Last successful check",value:date.formatted()) }
                 Text(store.updates.message).font(.subheadline)
+                if !store.connected { Label("Cached information · server disconnected",systemImage:"wifi.slash").font(.caption) }
                 Button("Check for Updates") { Task { if let api=store.api { await store.updates.check(using:api,force:true) } } }.disabled(store.updates.checking || store.api == nil)
                 if store.updates.checking { ProgressView("Checking…") }
             }
