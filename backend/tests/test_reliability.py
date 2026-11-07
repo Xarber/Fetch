@@ -153,3 +153,13 @@ def test_compatible_video_actually_transcodes(client,auth,incompatible_media_url
         assert {s['codec_name'] for s in probe['streams']}=={'h264','aac'}
     finally:worker.terminate();worker.wait(timeout=10)
     assert client.delete('/api/v1/downloads/'+ident,headers=auth).status_code==204
+
+def test_encoded_bootstrap_preserves_password_characters(tmp_path):
+    import base64
+    import sqlite3
+    from argon2 import PasswordHasher
+    password="a unique 'quoted' $password #2026"
+    env={**os.environ,'FETCH_DATA':str(tmp_path),'FETCH_ADMIN_PASSWORD':'','FETCH_ADMIN_PASSWORD_B64':base64.b64encode(password.encode()).decode()}
+    subprocess.run([sys.executable,'-c','from fetch_server.api import initialize_admin; initialize_admin()'],env=env,check=True,capture_output=True,timeout=20)
+    with sqlite3.connect(tmp_path/'fetch.sqlite3') as db: stored=db.execute('SELECT password FROM users WHERE id=?',('admin',)).fetchone()[0]
+    assert PasswordHasher().verify(stored,password)

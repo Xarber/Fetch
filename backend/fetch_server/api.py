@@ -32,6 +32,10 @@ def initialize_admin():
     with connect() as db:
         if not db.execute('SELECT 1 FROM users').fetchone():
             password = os.getenv('FETCH_ADMIN_PASSWORD','')
+            if not password and os.getenv('FETCH_ADMIN_PASSWORD_B64'):
+                import base64
+                try: password=base64.b64decode(os.environ['FETCH_ADMIN_PASSWORD_B64'],validate=True).decode()
+                except (ValueError,UnicodeError):raise RuntimeError('Invalid initial password encoding')
             if len(password) < 14:
                 raise RuntimeError('Set FETCH_ADMIN_PASSWORD to a unique password of at least 14 characters for initial setup')
             db.execute('INSERT INTO users VALUES(?,?)',('admin',hasher.hash(password)))

@@ -41,7 +41,7 @@ npm run build
 After configuring `.env`:
 
 ```sh
-docker compose build
+FETCH_COMMIT="$(git rev-parse HEAD)" docker compose build
 docker compose up -d
 docker compose ps
 ```
