@@ -15,3 +15,5 @@ On relaunch, interrupted staging files and artifacts moved before metadata persi
 ## Browser
 
 Fetch validates length and SHA-256 before offering a browser download. It currently buffers files in memory and limits this path to 128 MiB, directing larger transfers to the native client. Download completion/actual file save is controlled by the browser; server acknowledgement means bytes verified, not confirmed filesystem placement. Streaming File System Access saving and browser transfer cancellation/progress remain open.
+
+The native library also implements filename/title rename, duplication, movement into user-named managed subfolders, sorting, file information and explicit deletion. File operations preserve the original on metadata persistence failure where possible. These controls have not been executed on iOS; crash recovery during a library reorganization still needs native validation.
