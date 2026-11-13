@@ -23,3 +23,5 @@ dialog::backdrop{transition:opacity var(--motion-dialog) var(--ease-out);opacity
 @media(prefers-color-scheme:dark){:root{--accent:#b5b8ff;--muted:#b1b4c8;--focus:#c1c4ff}.button.primary{background:#b5b8ff;border-color:#b5b8ff;color:#1a1b30}.page-heading h1 span{color:#a2a6bc}.status{color:#d5d7ee}.square-icon,.purple,.job-icon{color:#b5b8ff}.green{color:#8ee0bc}.orange{color:#ffd08c}}
 @media(prefers-reduced-motion:reduce){button,.button,.nav,dialog,#toast{transition:opacity 120ms linear!important;transform:none!important}#toast{transform:translateX(-50%)!important}html{scroll-behavior:auto!important}}
 @media(forced-colors:active){.button,.nav.active,.download-card,.panel{border:1px solid CanvasText}.icon{forced-color-adjust:auto}}
+
+html[data-managed="true"] [data-developer-only] { display: none !important; }

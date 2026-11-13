@@ -9,6 +9,13 @@ type Idea = {id:string;title:string;description:string;category:string;priority:
 type Archive = {schemaVersion:number;project:string;exportedAt:number;ideas:Idea[]};
 const $ = <T extends HTMLElement = HTMLElement>(id:string):T => { const el=document.getElementById(id); if(!el) throw new Error(`Missing element ${id}`); return el as T; };
 const input=(id:string)=> $<HTMLInputElement>(id);
+const managed = document.documentElement.dataset.managed === 'true';
+if (managed) {
+ $('login-title').textContent = 'Sign in to Fetch';
+ $('password').setAttribute('aria-label', 'Password');
+ actionLabel($('login-submit'), 'Sign in', 'shield');
+ actionLabel($('session-button'), 'Sign in', 'shield');
+}
 let token=''; let jobs:Job[]=[]; let inspected:Inspection|null=null; let requestKey=crypto.randomUUID();
 let view='overview'; let developer=false; let taps=0; let lastTap=0; let lastInteraction=Date.now(); let editing:string|null=null;
 const titles:Record<string,string>={overview:'Overview',queue:'Download queue',library:'Media library',history:'History',server:'Server & security',about:'About Fetch',ideas:'Developer ideas'};
@@ -24,7 +31,7 @@ async function api<T>(path:string,method='GET',body?:unknown):Promise<T>{
  if(!response.ok){if(response.status===401&&path!=='auth/login'){token='';connected(false);}throw new Error(typeof result.detail==='string'?result.detail:`Request failed (${response.status})`);}
  return result as T;
 }
-function connected(online:boolean){$('connection-dot').classList.toggle('online',online);$('connection-label').textContent=online?'Server connected':'Not connected';actionLabel($('session-button'),token?'Sign out':'Connect server',token?'logout':'server');}
+function connected(online:boolean){$('connection-dot').classList.toggle('online',online);$('connection-label').textContent=online?'Server connected':'Not connected';actionLabel($('session-button'),token?'Sign out':managed?'Sign in':'Connect server',token?'logout':managed?'shield':'server');}
 function navigate(target:string){
  if(target==='ideas'&&!developer)return;
  if(view!==target&&target!=='ideas'){developer=false;taps=0;$('ideas-nav').hidden=true;}
@@ -32,7 +39,7 @@ function navigate(target:string){
  document.querySelectorAll<HTMLElement>('[data-view]').forEach(e=>e.classList.toggle('active',e.dataset.view===target));
  $('breadcrumb').textContent=titles[target]??target;enter($('view-'+target));
  if(target==='ideas')renderIdeas();
- if(target==='server'&&token)void diagnostics().catch(e=>toast(e.message));
+ if(target==='server'&&token&&!managed)void diagnostics().catch(e=>toast(e.message));
 }
 function renderJobs(){
  const active=jobs.filter(j=>['queued','downloading','postprocessing','pausing','paused'].includes(j.state));
@@ -41,7 +48,7 @@ function renderJobs(){
  const sets:Record<string,Job[]>={'recent-jobs':jobs.slice(0,4),'queue-jobs':active,'library-jobs':jobs.filter(j=>j.state==='ready'&&j.title.toLowerCase().includes(search)),'history-jobs':jobs.filter(j=>!active.includes(j))};
  for(const [id,list] of Object.entries(sets)){
   const container=$(id);const signature=JSON.stringify([list,Boolean(token)]);if(container.dataset.signature===signature)continue;container.dataset.signature=signature;const previous=new Set(Array.from(container.querySelectorAll<HTMLElement>('[data-job-id]')).map(el=>el.dataset.jobId));const focused=document.activeElement instanceof HTMLButtonElement&&container.contains(document.activeElement)?{job:document.activeElement.closest<HTMLElement>('[data-job-id]')?.dataset.jobId,label:document.activeElement.dataset.label}:null;container.replaceChildren();
-  if(!list.length){const empty=node('div',undefined,'empty');const emptyIcon=node('div',undefined,'empty-symbol');emptyIcon.append(icon('download'));empty.append(emptyIcon,node('strong',token?'Nothing here yet':'Your next great find starts here'),node('p',token?'New downloads will appear here.':'Connect your server, then paste your first link.'));container.append(empty);}
+  if(!list.length){const empty=node('div',undefined,'empty');const emptyIcon=node('div',undefined,'empty-symbol');emptyIcon.append(icon('download'));empty.append(emptyIcon,node('strong',token?'Nothing here yet':'Your next great find starts here'),node('p',token?'New downloads will appear here.':'Sign in, then paste your first link.'));container.append(empty);}
   for(const job of list){
    const row=node('article',undefined,'job');row.dataset.jobId=job.id;const symbol=node('div',undefined,'job-icon');symbol.append(icon(job.state==='ready'?'check':job.state==='failed'?'alert':'download'));row.append(symbol);
    const body=node('div',undefined,'job-content');body.append(node('h3',job.title));
@@ -161,7 +168,7 @@ $('pair-button').onclick=async()=>{try{const pair=await api<{challenge:string;qr
 $('refresh-devices').onclick=async()=>{try{const devices=await api<{id:string;name:string;admin:boolean}[]>('devices');$('devices').replaceChildren();for(const d of devices){const row=node('p',`${d.name}${d.admin?' · admin':''} `);row.append(button('Revoke',async()=>{if(confirm(`Revoke ${d.name}?`)){await api(`devices/${d.id}`,'DELETE');row.remove();}}));$('devices').append(row);}}catch(error){toast((error as Error).message);}};
 let ideaStorageLocked=false;
 function readIdeas():Idea[]{try{const stored=localStorage.getItem('fetch.ideas.v1');return stored?validateArchive(JSON.parse(stored)).ideas:[];}catch{ideaStorageLocked=true;toast('Ideas storage could not be read. Existing data was preserved.');return [];}}
-let ideas:Idea[]=readIdeas();
+let ideas:Idea[]=managed ? [] : readIdeas();
 function archive():Archive{return {schemaVersion:1,project:'org.openrecode.fetch',exportedAt:Date.now()/1000,ideas};}
 function persistIdeas(next:Idea[]){if(ideaStorageLocked){toast("Existing Ideas storage is unreadable and was preserved. Export the recovery file before repairing storage.");return;}try{localStorage.setItem('fetch.ideas.v1',JSON.stringify({...archive(),ideas:next}));ideas=next;renderIdeas();}catch{toast('Could not save ideas. Export your collection before closing this browser.');}}
 function renderIdeas(){
@@ -183,7 +190,7 @@ function validateArchive(value:unknown):Archive{
  const ids=new Set<string>();for(const idea of a.ideas){if(typeof idea.id!=='string'||!idea.id||ids.has(idea.id)||typeof idea.title!=='string'||!idea.title||idea.title.length>500||typeof idea.description!=='string'||idea.description.length>50000||!['Feature','Improvement','Bug Fix','UI/UX','Performance','Other'].includes(idea.category)||!['Low','Normal','High','Critical'].includes(idea.priority)||!['pending','approved','deferred','inProgress','implemented','rejected'].includes(idea.status)||!Array.isArray(idea.history)||!idea.history.every(h=>typeof h==='string')||!Array.isArray(idea.implementationReferences)||!idea.implementationReferences.every(h=>typeof h==='string')||!Number.isFinite(idea.created)||!Number.isFinite(idea.modified))throw new Error('Invalid idea entry');ids.add(idea.id);}return a;
 }
 input('import-ideas').onchange=async()=>{const file=input('import-ideas').files?.[0];if(!file)return;try{if(file.size>10_000_000)throw new Error('Ideas file too large');const incoming=validateArchive(JSON.parse(await file.text()));if(!confirm(`Import ${incoming.ideas.length} ideas? Existing ideas are preserved. Conflicts become separate copies.`))return;const merged=[...ideas];for(const idea of incoming.ideas){const old=merged.find(i=>i.id===idea.id);if(!old)merged.push(idea);else if(JSON.stringify(old,Object.keys(old).sort())!==JSON.stringify(idea,Object.keys(idea).sort()))merged.push({...idea,id:crypto.randomUUID(),title:idea.title+' (imported conflict)',history:[...idea.history,`Conflict preserved from ${idea.id}`]});}persistIdeas(merged);}catch(error){toast((error as Error).message);}finally{input('import-ideas').value='';}};
-function unlockDeveloper(){const now=Date.now();taps=now-lastTap<2000?taps+1:1;lastTap=now;if(taps===3){developer=true;$('ideas-nav').hidden=false;toast('Developer options enabled.');}}
+function unlockDeveloper(){if(managed)return;const now=Date.now();taps=now-lastTap<2000?taps+1:1;lastTap=now;if(taps===3){developer=true;$('ideas-nav').hidden=false;toast('Developer options enabled.');}}
 $('version-button').onclick=unlockDeveloper; $('version-button-about').onclick=unlockDeveloper;
 for(const event of ['pointerdown','keydown','scroll'])document.addEventListener(event,()=>{lastInteraction=Date.now();},{passive:true});
 setInterval(()=>{if(developer&&Date.now()-lastInteraction>30000){developer=false;$('ideas-nav').hidden=true;if(view==='ideas')navigate('about');}},1000);

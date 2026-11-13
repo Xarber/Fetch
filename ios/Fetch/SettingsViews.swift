@@ -9,6 +9,13 @@ struct SettingsView: View {
     var body: some View {
         @Bindable var store=store
         Form {
+            if AppStore.managedServer != nil {
+                Section("Fetch") {
+                    if !store.connected {
+                        NavigationLink { ServerSetupView() } label: { Label("Sign in", systemImage: "person.crop.circle") }
+                    }
+                }
+            } else {
             Section("Your servers") {
                 ForEach(store.profiles) { profile in
                     Button {
@@ -18,6 +25,7 @@ struct SettingsView: View {
                 }
                 NavigationLink { ServerSetupView() } label: { Label("Connect a server",systemImage:"plus.circle") }
                 NavigationLink { DiagnosticsView() } label: { Label("Connection diagnostics",systemImage:"waveform.path.ecg") }
+            }
             }
             Section("Transfers") {
                 Toggle("Transfer on Wi-Fi only",isOn:$wifiOnly)
@@ -41,8 +49,12 @@ struct SettingsView: View {
                 NavigationLink { ChangelogView() } label: { Label("What’s New",systemImage:"sparkles") }
                 NavigationLink { UpdatesView() } label: { Label("Updates",systemImage:"arrow.triangle.2.circlepath") }
                 LabeledContent("License",value:"AGPL-3.0-only")
-                Button("Version \(AppStore.version)") { store.versionTapped() }
-                Text("Build \(AppStore.commit)").font(.caption.monospaced()).textSelection(.enabled)
+                if AppStore.managedServer == nil {
+                    Button("Version \(AppStore.version)") { store.versionTapped() }
+                    Text("Build \(AppStore.commit)").font(.caption.monospaced()).textSelection(.enabled)
+                } else {
+                    LabeledContent("Version", value: AppStore.version)
+                }
             }
             if store.developer {
                 Section("Developer options") {
@@ -68,31 +80,36 @@ struct ServerSetupView: View {
     @State private var busy=false
     var body: some View {
         Form {
-            Section("Self-hosted server") {
+            Section(AppStore.managedServer == nil ? "Self-hosted server" : "Fetch") {
+                if AppStore.managedServer == nil {
                 TextField("Name",text:$name)
                 TextField("https://fetch.example.com",text:$address).keyboardType(.URL).textInputAutocapitalization(.never).autocorrectionDisabled()
+                }
                 Button { scanning=true } label: { Label("Scan pairing QR code",systemImage:"qrcode.viewfinder") }
                 Toggle("Use a pairing challenge",isOn:$pairing)
                 if pairing { TextField("One-use challenge from administrator",text:$challenge).textInputAutocapitalization(.never).autocorrectionDisabled() }
                 else { SecureField("Administrator password",text:$password) }
             }
             Section {
-                Button("Connect securely") {
+                Button(AppStore.managedServer == nil ? "Connect securely" : "Sign in", systemImage: "person.crop.circle") {
                     busy=true
                     Task {
                         defer { busy=false }
                         do {
-                            let url=try FetchAPI.validatedURL(address.trimmingCharacters(in:.whitespacesAndNewlines))
-                            let profile=ServerProfile(name:name.isEmpty ? "Fetch server" : name,url:url)
+                            let url = try AppStore.managedServer ?? FetchAPI.validatedURL(address.trimmingCharacters(in: .whitespacesAndNewlines))
+                            let profile = AppStore.managedServer.flatMap { endpoint in
+                                store.profiles.first { $0.url == endpoint }
+                            } ?? ServerProfile(name: AppStore.managedServer == nil ? (name.isEmpty ? "Fetch server" : name) : "Fetch", url: url)
                             let api=FetchAPI(profile:profile,token:"")
                             let session:SessionToken = try await api.send(pairing ? "pairing/complete" : "auth/login",object:pairing ? ["challenge":challenge,"device_name":UIDevice.current.name] : ["username":"admin","password":password,"device_name":UIDevice.current.name])
                             try Keychain.save(session.token,for:profile.id)
-                            store.profiles.append(profile); store.selectedId=profile.id
+                            if !store.profiles.contains(where: { $0.id == profile.id }) { store.profiles.append(profile) }
+                            store.selectedId = profile.id
                             try AppStore.save(store.profiles,name:"servers.json"); UserDefaults.standard.set(profile.id,forKey:"server")
                             password=""; challenge=""; store.pairingURL=nil; await store.refresh(); dismiss()
                         } catch { store.error=error.localizedDescription }
                     }
-                }.disabled(busy || address.isEmpty)
+                }.disabled(busy || (AppStore.managedServer == nil && address.isEmpty))
                 if busy { ProgressView("Connecting…") }
                 Text("Use a trusted HTTPS endpoint. Pairing challenges expire after three minutes and grant access to the personal media library without server administration.").font(.footnote).foregroundStyle(.secondary)
             }
@@ -105,6 +122,10 @@ struct ServerSetupView: View {
               let server=components.queryItems?.first(where:{$0.name=="server"})?.value,
               let code=components.queryItems?.first(where:{$0.name=="challenge"})?.value,
               (try? FetchAPI.validatedURL(server)) != nil else { store.error="This is not a valid Fetch pairing code."; return }
+        if let endpoint = AppStore.managedServer, (try? FetchAPI.validatedURL(server)) != endpoint {
+            store.error = "This pairing code belongs to a different server."
+            return
+        }
         address=server; challenge=code; pairing=true
     }
 }

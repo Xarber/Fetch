@@ -15,7 +15,7 @@ from typing import Annotated
 from argon2 import PasswordHasher
 from argon2.exceptions import VerificationError, InvalidHashError
 from fastapi import FastAPI, Depends, Header, HTTPException, Request
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from . import __version__
 from .config import DATA, CONCURRENCY, RETENTION, MAX_BYTES, STORE_MODE, SOURCE_HOSTS
@@ -365,4 +365,11 @@ def corresponding_source(d=Depends(device)):
     return FileResponse(archive,filename='Fetch-corresponding-source.tar.gz',media_type='application/gzip')
 
 web = Path(os.getenv('FETCH_WEB',str(Path(__file__).resolve().parents[2]/'web')))
-if web.is_dir(): app.mount('/',StaticFiles(directory=web,html=True),name='dashboard')
+if web.is_dir():
+    if os.getenv('FETCH_MANAGED') == '1':
+        @app.get('/', include_in_schema=False)
+        @app.get('/index.html', include_in_schema=False)
+        def managed_dashboard():
+            html = (web / 'index.html').read_text(encoding='utf-8')
+            return HTMLResponse(html.replace('data-managed="false"', 'data-managed="true"', 1))
+    app.mount('/', StaticFiles(directory=web, html=True), name='dashboard')

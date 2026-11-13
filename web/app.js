@@ -6,6 +6,13 @@ decorateIcons();
 const $ = (id) => { const el = document.getElementById(id); if (!el)
     throw new Error(`Missing element ${id}`); return el; };
 const input = (id) => $(id);
+const managed = document.documentElement.dataset.managed === 'true';
+if (managed) {
+    $('login-title').textContent = 'Sign in to Fetch';
+    $('password').setAttribute('aria-label', 'Password');
+    actionLabel($('login-submit'), 'Sign in', 'shield');
+    actionLabel($('session-button'), 'Sign in', 'shield');
+}
 let token = '';
 let jobs = [];
 let inspected = null;
@@ -44,7 +51,7 @@ async function api(path, method = 'GET', body) {
     }
     return result;
 }
-function connected(online) { $('connection-dot').classList.toggle('online', online); $('connection-label').textContent = online ? 'Server connected' : 'Not connected'; actionLabel($('session-button'), token ? 'Sign out' : 'Connect server', token ? 'logout' : 'server'); }
+function connected(online) { $('connection-dot').classList.toggle('online', online); $('connection-label').textContent = online ? 'Server connected' : 'Not connected'; actionLabel($('session-button'), token ? 'Sign out' : managed ? 'Sign in' : 'Connect server', token ? 'logout' : managed ? 'shield' : 'server'); }
 function navigate(target) {
     if (target === 'ideas' && !developer)
         return;
@@ -60,7 +67,7 @@ function navigate(target) {
     enter($('view-' + target));
     if (target === 'ideas')
         renderIdeas();
-    if (target === 'server' && token)
+    if (target === 'server' && token && !managed)
         void diagnostics().catch(e => toast(e.message));
 }
 function renderJobs() {
@@ -83,7 +90,7 @@ function renderJobs() {
             const empty = node('div', undefined, 'empty');
             const emptyIcon = node('div', undefined, 'empty-symbol');
             emptyIcon.append(icon('download'));
-            empty.append(emptyIcon, node('strong', token ? 'Nothing here yet' : 'Your next great find starts here'), node('p', token ? 'New downloads will appear here.' : 'Connect your server, then paste your first link.'));
+            empty.append(emptyIcon, node('strong', token ? 'Nothing here yet' : 'Your next great find starts here'), node('p', token ? 'New downloads will appear here.' : 'Sign in, then paste your first link.'));
             container.append(empty);
         }
         for (const job of list) {
@@ -384,7 +391,7 @@ catch {
     toast('Ideas storage could not be read. Existing data was preserved.');
     return [];
 } }
-let ideas = readIdeas();
+let ideas = managed ? [] : readIdeas();
 function archive() { return { schemaVersion: 1, project: 'org.openrecode.fetch', exportedAt: Date.now() / 1000, ideas }; }
 function persistIdeas(next) { if (ideaStorageLocked) {
     toast("Existing Ideas storage is unreadable and was preserved. Export the recovery file before repairing storage.");
@@ -469,7 +476,8 @@ catch (error) {
 finally {
     input('import-ideas').value = '';
 } };
-function unlockDeveloper() { const now = Date.now(); taps = now - lastTap < 2000 ? taps + 1 : 1; lastTap = now; if (taps === 3) {
+function unlockDeveloper() { if (managed)
+    return; const now = Date.now(); taps = now - lastTap < 2000 ? taps + 1 : 1; lastTap = now; if (taps === 3) {
     developer = true;
     $('ideas-nav').hidden = false;
     toast('Developer options enabled.');

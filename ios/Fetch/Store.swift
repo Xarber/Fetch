@@ -3,6 +3,12 @@ import SwiftUI
 import Observation
 
 @MainActor @Observable final class AppStore {
+    static let managedServer: URL? = {
+        guard let address = Bundle.main.object(forInfoDictionaryKey: "FetchServerURL") as? String,
+              let url = try? FetchAPI.validatedURL(address), url.scheme == "https" else { return nil }
+        return url
+    }()
+
     var updates = UpdateStore()
     var profiles: [ServerProfile] = []
     var selectedId: String = ""
@@ -35,9 +41,13 @@ import Observation
     init() {
         profiles = Self.load("servers.json", default: [])
         selectedId = UserDefaults.standard.string(forKey: "server") ?? profiles.first?.id ?? ""
+        if let endpoint = Self.managedServer {
+            let profile = profiles.first { $0.url == endpoint }
+            selectedId = profile?.id ?? ""
+        }
         ideas = Self.load("ideas.json", default: [])
         jobs = Self.load("jobs-\(selectedId).json", default: [])
-        welcome = !UserDefaults.standard.bool(forKey: "welcomed")
+        welcome = Self.managedServer == nil && !UserDefaults.standard.bool(forKey: "welcomed")
         let previous = UserDefaults.standard.string(forKey: "lastVersion")
         whatsNew = previous != nil && previous != Self.version
         UserDefaults.standard.set(Self.version, forKey: "lastVersion")
@@ -63,6 +73,7 @@ import Observation
     }
     func lockDeveloper() { developer = false; taps = 0 }
     func versionTapped() {
+        guard Self.managedServer == nil else { return }
         if Date().timeIntervalSince(lastInteraction) > 3 { taps = 0 }
         lastInteraction = Date(); taps += 1
         if taps == 3 { developer = true; taps = 0 }

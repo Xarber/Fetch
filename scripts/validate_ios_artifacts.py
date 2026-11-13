@@ -33,7 +33,11 @@ for package in root.iterdir():
             assert 'arm64' in arch
             platform=subprocess.check_output(['xcrun','vtool','-show-build',str(binary)],text=True)
             assert ('IOSSIMULATOR' in platform) if not device else ('IOS' in platform and 'IOSSIMULATOR' not in platform)
-        assert plistlib.loads((app/'Info.plist').read_bytes())['FetchCommit']==commit
+        app_info = plistlib.loads((app/'Info.plist').read_bytes())
+        assert app_info['FetchCommit'] == commit
+        expected_server = os.getenv('FETCH_EXPECTED_SERVER_URL')
+        if expected_server is not None:
+            assert app_info.get('FetchServerURL', '') == ('' if expected_server == 'self-hosted' else expected_server)
         count+=1
 if count!=2:raise SystemExit('Expected complete device and simulator artifact pair')
 print('Validated both artifact layouts, binaries, identifiers, versions and build commit')

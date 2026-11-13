@@ -1,6 +1,12 @@
 name: iOS artifacts
 on:
   workflow_dispatch:
+    inputs:
+      variant:
+        description: Native configuration
+        type: choice
+        options: [xcenter, self-hosted]
+        default: xcenter
   push:
     branches: [beta, main]
 permissions:
@@ -18,6 +24,23 @@ jobs:
         platform: [device, simulator]
     steps:
       - uses: actions/checkout@v4
+      - name: Select the server configuration
+        env:
+          VARIANT: ${{ inputs.variant || 'xcenter' }}
+          CONFIGURED_URL: ${{ vars.FETCH_SERVER_URL }}
+        run: |
+          set -euo pipefail
+          if [ "$VARIANT" = xcenter ]; then
+            endpoint="${CONFIGURED_URL:-https://fetch.xcenter.it}"
+            if [[ ! "$endpoint" =~ ^https://[A-Za-z0-9.-]+(:[0-9]+)?$ ]]; then
+              echo 'FETCH_SERVER_URL must be an HTTPS origin' >&2
+              exit 1
+            fi
+            printf 'FETCH_SERVER_URL=%s
+' "$endpoint" >> "$GITHUB_ENV"
+          else
+            echo 'FETCH_SERVER_URL=' >> "$GITHUB_ENV"
+          fi
       - name: Build unsigned native bundle
         env:
           PLATFORM: ${{ matrix.platform }}
@@ -25,7 +48,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ "$PLATFORM" = device ]; then SDK=iphoneos; DEST='generic/platform=iOS'; else SDK=iphonesimulator; DEST='generic/platform=iOS Simulator'; fi
-          xcodebuild -project ios/Fetch.xcodeproj -scheme Fetch -configuration Release -sdk "$SDK" -destination "$DEST" -derivedDataPath build CODE_SIGNING_ALLOWED=NO FETCH_COMMIT="$FETCH_COMMIT" FETCH_CHANNEL=${{ github.ref_name == 'beta' && 'beta' || 'stable' }} build
+          xcodebuild -project ios/Fetch.xcodeproj -scheme Fetch -configuration Release -sdk "$SDK" -destination "$DEST" -derivedDataPath build CODE_SIGNING_ALLOWED=NO FETCH_COMMIT="$FETCH_COMMIT" FETCH_SERVER_URL="$FETCH_SERVER_URL" FETCH_CHANNEL=${{ github.ref_name == 'beta' && 'beta' || 'stable' }} build
           mkdir -p artifacts
           if [ "$PLATFORM" = device ]; then
             mkdir Payload
@@ -51,10 +74,11 @@ jobs:
         with:
           python-version: '3.13'
       - run: python scripts/validate_ios_artifacts.py artifacts
+        env:
+          FETCH_EXPECTED_SERVER_URL: ${{ inputs.variant == 'self-hosted' && 'self-hosted' || vars.FETCH_SERVER_URL || 'https://fetch.xcenter.it' }}
       - run: python scripts/release_metadata.py --channel ${{ github.ref_name == 'main' && 'stable' || 'beta' }} --artifacts artifacts
       - uses: actions/upload-artifact@v4
         with:
           name: Fetch-release-metadata-${{ github.sha }}
           path: artifacts/release-manifest.json
-# No publication: an authorized destination, signing policy and successful
-# native/device validation must be established before enabling releases.
+# Workflow artifacts are kept on GitHub Actions for inspection.

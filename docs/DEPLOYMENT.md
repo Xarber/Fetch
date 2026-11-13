@@ -47,3 +47,11 @@ The container build packages the application source without runtime data, creden
 Private x86-64 Compose staging serves Fetch 0.1.0 at commit `82d40b2eda2ed2aaec9062b163a26c547a7d006a`. The API listens on host loopback port 18440. The landing, setup guide, authentication, version endpoint, engine availability and SQLite worker heartbeat were verified. The local browser fixture exercised media processing separately. X-Center had approximately 1.4 GiB available after the build, below this deployment’s 2 GiB floor. The worker will hold queued downloads until more storage is available.
 
 Open an SSH local forward from port 18440 to X-Center loopback port 18440 using the existing authenticated route. Release directories are grouped under `/srv/xcenter/apps/openrecode-fetch/releases`. The previous image and snapshot at `cf3a0fe532e47de0b38b1bbf3533eb617b3f4914` are retained for rollback with the same protected environment file and volume.
+
+## Managed X-Center installation
+
+The managed origin is `https://fetch.xcenter.it`. Its dedicated Nginx virtual host is in [deploy/xcenter/nginx.conf](../deploy/xcenter/nginx.conf). It uses the appliance wildcard certificate and proxies only to the dedicated loopback API. The API and worker share one private persistent volume. Fetch sessions and transfers require authentication.
+
+Set `FETCH_MANAGED=1` in the server dotenv to serve the same-origin sign-in and hide diagnostic and developer fields. The iOS GitHub Actions workflow embeds the managed endpoint by default. Set repository Actions variable `FETCH_SERVER_URL` to override it. Choose the manual `self-hosted` variant to build with server entry enabled. Neither configuration contains login credentials.
+
+Validate the exact image tag, TLS, API authentication, worker heartbeat and a controlled media transfer before promotion. Keep the immediately previous image and volume for rollback.

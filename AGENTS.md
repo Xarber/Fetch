@@ -15,7 +15,7 @@ Read docs/IDEAS.json at session start. Report pending/approved/deferred counts a
 - web/src: strict TypeScript; build with npm run build. web/app.js is generated and committed for backend/container use.
 - scripts: local runner, test fixtures, backup, branding export, project generation and release metadata.
 
-Use Conventional Commits. Work on testing or isolated branches; integrate into testing before any promotion. beta/main are reserved for validated promotions. X-Center is the default host for private Fetch services. Preserve existing services and keep public exposure, publishing and repository visibility changes subject to explicit authorization. Review docs/REPOSITORY_REUSE.md before touching the original repository. CI may prepare private artifacts only. Do not migrate to Android/Expo or build an on-device Python engine without a justified task.
+Use Conventional Commits. Work on testing or isolated branches; integrate into testing before any promotion. beta/main are reserved for validated promotions. X-Center is the default host for managed Fetch services. Preserve existing services and keep public exposure, publishing and repository visibility changes subject to explicit authorization. Review docs/REPOSITORY_REUSE.md before touching the original repository. Build artifacts are produced by GitHub Actions. Releases and additional distribution channels require explicit authorization. Do not migrate to Android/Expo or build an on-device Python engine without a justified task.
 
 ## Checks
 

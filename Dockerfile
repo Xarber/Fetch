@@ -1,8 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 FROM denoland/deno:2.5.6 AS javascript
 FROM python:3.13-slim-bookworm
-ARG FETCH_COMMIT=development
-ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 FETCH_DATA=/data FETCH_WEB=/app/web FETCH_SOURCE_ARCHIVE=/app/fetch-source.tar.gz FETCH_COMMIT=${FETCH_COMMIT} YTDLP_NO_PLUGINS=1 DENO_DIR=/tmp/deno
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 FETCH_DATA=/data FETCH_WEB=/app/web FETCH_SOURCE_ARCHIVE=/app/fetch-source.tar.gz YTDLP_NO_PLUGINS=1 DENO_DIR=/tmp/deno
 RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg ca-certificates && rm -rf /var/lib/apt/lists/* \
     && groupadd -g 10001 fetch && useradd -u 10001 -g fetch -d /app fetch \
     && mkdir /data /app && chown fetch:fetch /data /app
@@ -10,6 +9,8 @@ COPY --from=javascript /usr/bin/deno /usr/local/bin/deno
 WORKDIR /app
 COPY requirements.lock ./
 RUN pip install --no-cache-dir -r requirements.lock
+ARG FETCH_COMMIT=development
+ENV FETCH_COMMIT=${FETCH_COMMIT}
 COPY pyproject.toml ./
 COPY backend ./backend
 COPY web ./web

@@ -86,4 +86,4 @@ Basic URL batches are supported. Playlist item selection, QR pairing/scanning, l
 
 ## Documentation & license
 
-Start with [docs/INDEX.md](docs/INDEX.md) and [AGENTS.md](AGENTS.md). Original code: **AGPL-3.0-only**, copyright © 2026 OpenRecode contributors. Third-party components retain their licenses; [notices](THIRD_PARTY_NOTICES.md). Development source is stored in the private [OpenRecode-Fetch repository](https://github.com/Xarber/OpenRecode-Fetch); no public release or distribution channel is configured.
+Start with [docs/INDEX.md](docs/INDEX.md) and [AGENTS.md](AGENTS.md). Original code: **AGPL-3.0-only**, copyright © 2026 OpenRecode contributors. Third-party components retain their licenses; [notices](THIRD_PARTY_NOTICES.md). Source is available in the original [Fetch repository](https://github.com/Xarber/Fetch). The [X-Center installation](https://fetch.xcenter.it) uses a dedicated authenticated API and worker.

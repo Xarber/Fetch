@@ -29,6 +29,8 @@
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>FetchServerURL</key>
+	<string>$(FETCH_SERVER_URL)</string>
 	<key>FetchChannel</key>
 	<string>$(FETCH_CHANNEL)</string>
 	<key>FetchCommit</key>
