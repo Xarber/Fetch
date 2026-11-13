@@ -41,3 +41,9 @@ For the named Docker volume, stop both services and use the host's supported enc
 ## Corresponding source
 
 The container build packages the application source without runtime data, credentials, signing files or dependencies. Authenticated users can download it from About Fetch or `/api/v1/source`, preserving private access without relying on public repository visibility. Local deployments must run `python scripts/package_source.py` again for each deployed revision. Never include private local files in a build context; use a clean checkout. This source offer supports AGPL obligations but does not replace reviewing bundled third-party source/notices requirements.
+
+## X-Center staging — 2026-11-13
+
+Private x86-64 Compose staging serves Fetch 0.1.0 at commit `82d40b2eda2ed2aaec9062b163a26c547a7d006a`. The API listens on host loopback port 18440. The landing, setup guide, authentication, version endpoint, engine availability and SQLite worker heartbeat were verified. The local browser fixture exercised media processing separately. X-Center had approximately 1.4 GiB available after the build, below this deployment’s 2 GiB floor. The worker will hold queued downloads until more storage is available.
+
+Open an SSH local forward from port 18440 to X-Center loopback port 18440 using the existing authenticated route. Release directories are grouped under `/srv/xcenter/apps/openrecode-fetch/releases`. The previous image and snapshot at `cf3a0fe532e47de0b38b1bbf3533eb617b3f4914` are retained for rollback with the same protected environment file and volume.

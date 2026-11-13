@@ -57,3 +57,5 @@ The validated implementation snapshot is `b1785132d7ed582348ae5e91b73eb4e4c3b728
 ## UADS web follow-up — 2026-11-13
 
 Chrome and Playwright passed all four cases on macOS, including the disposable backend with generated authorized media, FFmpeg processing and verified browser saving. The responsive 390px test verified the actual mobile preview image loaded. The suite covered the root introduction, setup guide return link, direct queue link, remembered entry, authenticated session and draft preservation, keyboard and reduced-motion settings, and offline navigation. TypeScript checking, production web export, and 47 Python tests passed. The Xcode project passed property-list lint and the changed Swift files parsed. The configured Xcode installation was unavailable, so iOS builds, simulators and devices remain unverified. Android artifacts and physical-device PWA installation were outside this verification.
+
+[Private X-Center staging](../DEPLOYMENT.md#x-center-staging--2026-11-13) passed health, authentication, version and worker checks on x86-64. The staging disk was below the download floor, so media processing was verified only on the isolated local fixture.
