@@ -1,0 +1,46 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+x-common: &common
+  build:
+    context: .
+    args:
+      FETCH_COMMIT: ${FETCH_COMMIT:-development}
+  image: openrecode-fetch:${FETCH_IMAGE_TAG:-local}
+  env_file: ${FETCH_ENV_FILE:-.env}
+  environment:
+    FETCH_DATA: /data
+  volumes:
+    - fetch-data:/data
+  restart: unless-stopped
+  read_only: true
+  tmpfs:
+    - /tmp:size=256m,mode=1777
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  pids_limit: 160
+  mem_limit: 1g
+  cpus: 2
+  logging:
+    driver: json-file
+    options:
+      max-size: 10m
+      max-file: "3"
+services:
+  api:
+    <<: *common
+    ports: ["127.0.0.1:${FETCH_PORT:-8000}:8000"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health',timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+  worker:
+    <<: *common
+    command: ["python", "-m", "fetch_server.worker"]
+    stop_grace_period: 20s
+    healthcheck:
+      test: ["CMD", "python", "-c", "import sqlite3,time; c=sqlite3.connect('/data/fetch.sqlite3'); r=c.execute(\"select value from settings where key='worker_heartbeat'\").fetchone(); assert r and time.time()-float(r[0])<15"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+volumes:
+  fetch-data:

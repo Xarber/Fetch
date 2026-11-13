@@ -1,0 +1,9 @@
+# Fetch on the web
+
+The root route serves an introduction and the workspace in the same document. On first visit, the introduction is visible. Open your workspace stores `fetch.workspace-entered.v1` in localStorage and switches to the workspace. If storage is unavailable, the preference lasts for the current document. Subsequent visits open the workspace directly. The brand link opens the introduction at `/?welcome`. Browser Back and Forward restore the relevant view. Direct links such as `/#queue` open the requested workspace view. Developer Ideas still requires the local unlock.
+
+The workspace stays mounted when the introduction is shown, preserving session credentials in memory and keeping unsaved form values. The guide at `/guide/` is a separate document. A full reload or leaving for the guide retains the entry preference, but ends the in-memory session as before. The service worker precaches the introduction, guide and static test screenshots, with API responses excluded.
+
+Shared line icons supplement text labels. Interactive colors are separate from the brand color for contrast. Press feedback, dialog transitions and short entrances communicate changes without blocking interactions. Keyboard navigation is immediate. Reduced Motion disables positional entrances and keeps feedback readable. New rows animate once, while polling the same state preserves row identity. SwiftUI retains system navigation and sheet motion and uses a short transition for structural changes to the download list, disabled with Reduce Motion. The web router is absent from the native app.
+
+The root includes descriptive and social metadata. Hosting access is configured separately. Screenshots show generated browser fixtures. iOS installation instructions explain the outstanding native build and device checks.

@@ -1,0 +1,60 @@
+name: iOS artifacts
+on:
+  workflow_dispatch:
+  push:
+    branches: [beta, main]
+permissions:
+  contents: read
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  ios:
+    name: iOS ${{ matrix.platform }}
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [device, simulator]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build unsigned native bundle
+        env:
+          PLATFORM: ${{ matrix.platform }}
+          FETCH_COMMIT: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          if [ "$PLATFORM" = device ]; then SDK=iphoneos; DEST='generic/platform=iOS'; else SDK=iphonesimulator; DEST='generic/platform=iOS Simulator'; fi
+          xcodebuild -project ios/Fetch.xcodeproj -scheme Fetch -configuration Release -sdk "$SDK" -destination "$DEST" -derivedDataPath build CODE_SIGNING_ALLOWED=NO FETCH_COMMIT="$FETCH_COMMIT" FETCH_CHANNEL=${{ github.ref_name == 'beta' && 'beta' || 'stable' }} build
+          mkdir -p artifacts
+          if [ "$PLATFORM" = device ]; then
+            mkdir Payload
+            cp -R build/Build/Products/Release-iphoneos/Fetch.app Payload/
+            ditto -c -k --sequesterRsrc --keepParent Payload "artifacts/Fetch-v0.1.0-${GITHUB_REF_NAME}-${GITHUB_SHA}-ios-unsigned.ipa"
+          else
+            ditto -c -k --sequesterRsrc --keepParent build/Build/Products/Release-iphonesimulator/Fetch.app "artifacts/Fetch-v0.1.0-${GITHUB_REF_NAME}-${GITHUB_SHA}-ios-simulator.app.zip"
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Fetch-0.1.0-${{ github.ref_name }}-${{ github.sha }}-${{ matrix.platform }}
+          path: artifacts/*
+  validate:
+    needs: ios
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python scripts/validate_ios_artifacts.py artifacts
+      - run: python scripts/release_metadata.py --channel ${{ github.ref_name == 'main' && 'stable' || 'beta' }} --artifacts artifacts
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Fetch-release-metadata-${{ github.sha }}
+          path: artifacts/release-manifest.json
+# No publication: an authorized destination, signing policy and successful
+# native/device validation must be established before enabling releases.
