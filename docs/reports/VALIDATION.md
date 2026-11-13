@@ -53,3 +53,7 @@ The browser screenshots show generated isolated QA media, never native UI or per
 ## Git handoff
 
 The validated implementation snapshot is `b1785132d7ed582348ae5e91b73eb4e4c3b728c1`. Development was pushed to `testing` in private `Xarber/OpenRecode-Fetch`; `main` and `beta` remain at the governance baseline `5b21f96`. The existing public `Xarber/Fetch` was not changed. The working tree was clean, no temporary branch/worktree was created, and no native build/release run was started. Commits were unsigned because the configured hardware signing key was not connected; its configuration was not changed.
+
+## UADS web follow-up — 2026-11-13
+
+Chrome and Playwright passed all four cases on macOS, including the disposable backend with generated authorized media, FFmpeg processing and verified browser saving. The responsive 390px test verified the actual mobile preview image loaded. The suite covered the root introduction, setup guide return link, direct queue link, remembered entry, authenticated session and draft preservation, keyboard and reduced-motion settings, and offline navigation. TypeScript checking, production web export, and 47 Python tests passed. The Xcode project passed property-list lint and the changed Swift files parsed. The configured Xcode installation was unavailable, so iOS builds, simulators and devices remain unverified. Android artifacts and physical-device PWA installation were outside this verification.
