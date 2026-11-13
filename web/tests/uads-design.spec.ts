@@ -6,8 +6,11 @@ test('landing, setup guide, icons, contrast and private workspace remain distinc
  await page.goto('/?welcome');
  await expect(page.getByRole('heading',{name:'Keep something worth keeping.'})).toBeVisible();
  await expect(page.getByText('no signed app release is available yet',{exact:false})).toBeVisible();
- await expect(page.getByRole('img',{name:/Fetch browser dashboard/})).toBeVisible();
- await page.screenshot({path:'docs/reports/landing-desktop.png',fullPage:true});
+ const preview=page.getByRole('img',{name:/Fetch browser dashboard/});
+ await expect(preview).toBeVisible();
+ await preview.scrollIntoViewIfNeeded();
+ await preview.evaluate(image=>(image as HTMLImageElement).decode());
+ await page.screenshot({path:'docs/reports/landing-desktop.png',fullPage:true,animations:'disabled'});
  await page.getByRole('link',{name:'Open your workspace'}).click();
  await expect(page.getByRole('heading',{name:'Good media. Yours to keep.'})).toBeVisible();
  await expect(page.locator('[data-view=overview] svg')).toHaveCount(1);
@@ -25,9 +28,16 @@ test('landing, setup guide, icons, contrast and private workspace remain distinc
  await expect(page.getByRole('heading',{name:'Start on your own terms.'})).toBeVisible();
  await page.setViewportSize({width:390,height:844});
  await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
- await page.goto('/?welcome');
+ await page.getByRole('link',{name:'Product',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'Keep something worth keeping.'})).toBeVisible();
  await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
- await page.screenshot({path:'docs/reports/landing-mobile.png',fullPage:true});
+ await preview.scrollIntoViewIfNeeded();
+ await preview.evaluate(async image=>{
+  const screenshot=image as HTMLImageElement;
+  await screenshot.decode();
+  if(!screenshot.currentSrc.endsWith('dashboard-mobile.png')) throw new Error('Missing mobile workspace screenshot');
+ });
+ await page.screenshot({path:'docs/reports/landing-mobile.png',fullPage:true,animations:'disabled'});
  expect(errors).toEqual([]);
 });
 
