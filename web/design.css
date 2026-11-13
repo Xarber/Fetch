@@ -1,0 +1,25 @@
+/* SPDX-License-Identifier: AGPL-3.0-only */
+:root{--brand:#6269f5;--accent:#5057d6;--muted:#626679;--ease-out:cubic-bezier(.23,1,.32,1);--ease-in-out:cubic-bezier(.77,0,.175,1);--motion-press:120ms;--motion-feedback:160ms;--motion-dialog:220ms;--focus:#5057d6}
+.icon{width:1.2em;height:1.2em;display:inline-block;flex-shrink:0;vertical-align:-.2em;pointer-events:none}
+button,.button,.nav{min-height:44px;-webkit-tap-highlight-color:transparent;transition:transform var(--motion-press) var(--ease-out),opacity var(--motion-feedback) var(--ease-out)}
+button:active:not(:disabled),.button:active{transform:scale(.98)}
+.button.primary{background:var(--accent);border-color:var(--accent)}
+.button:focus-visible,button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+.nav span{display:inline-flex;align-items:center;justify-content:center}.nav.active{color:var(--accent)}
+.workspace-label,.version,.private-badge,.pill,.stat-label,.stat-caption,.source-note,.source-note>span,.ownership-card>span,footer{color:var(--muted)}
+.page p,.source-note,.card-heading p,.section-heading p,.ownership-card p,.job p{color:var(--muted)}
+.page p{font-size:14px}.card-heading p,.section-heading p,.job p,.source-note,.stat-label{font-size:12px}.stat-caption,.workspace-label,.private-badge,.version,footer{font-size:11px}.pill{font-size:10px}.job h3{font-size:14px}.status{font-size:11px}.ownership-card h3{font-size:14px}.ownership-card p{font-size:12px}.source-note .text-button{font-size:12px}.button,.text-button{font-size:13px}.page-heading h1 span{color:#747789}
+.source-note{line-height:1.7;flex-wrap:wrap}.source-note .text-button{margin-left:auto}.topbar{font-size:12px}.square-icon,.stat-symbol,.job-icon,.empty-symbol,.ownership-icon{display:flex;align-items:center;justify-content:center}.square-icon .icon,.stat-symbol .icon,.job-icon .icon{width:22px;height:22px}.empty-symbol .icon{width:32px;height:32px}.ownership-icon .icon{width:34px;height:34px}
+.info-section{padding:18px 0;border-top:1px solid var(--line)}.info-section h3{display:flex;gap:10px;align-items:center;font-size:16px}.dashboard-links{display:flex;gap:12px;align-items:center;padding-bottom:16px}.dashboard-links a{color:var(--accent);font-size:13px;min-height:44px;display:inline-flex;align-items:center;gap:8px}
+#toast{opacity:1;transform:translate(-50%,0);transition:opacity var(--motion-feedback) var(--ease-out),transform var(--motion-feedback) var(--ease-out),display var(--motion-feedback) allow-discrete}
+#toast[hidden]{opacity:0;transform:translate(-50%,8px);pointer-events:none}
+dialog{opacity:0;transform:scale(.96);transition:opacity var(--motion-dialog) var(--ease-out),transform var(--motion-dialog) var(--ease-out),display var(--motion-dialog) allow-discrete,overlay var(--motion-dialog) allow-discrete}
+dialog[open]{opacity:1;transform:scale(1)}
+dialog::backdrop{transition:opacity var(--motion-dialog) var(--ease-out);opacity:0}dialog[open]::backdrop{opacity:1}
+@starting-style{dialog[open]{opacity:0;transform:scale(.96)}dialog[open]::backdrop{opacity:0}#toast:not([hidden]){opacity:0;transform:translate(-50%,8px)}}
+[data-input=keyboard] button,[data-input=keyboard] .button,[data-input=keyboard] dialog,[data-input=keyboard] #toast{transition:none;transform:none}[data-input=keyboard] #toast{transform:translateX(-50%)}
+@media(hover:hover) and (pointer:fine){.button:hover:not(:disabled),.nav:hover{opacity:.86}}
+@media(max-width:700px){input,textarea,select,.url-field input,label input:not([type=checkbox]),label select{font-size:16px}.source-note{font-size:12px}.stat-label{font-size:11px}.stats article{padding:11px}.topbar{font-size:11px}.nav{font-size:12px}.page{padding-left:max(20px,env(safe-area-inset-left));padding-right:max(20px,env(safe-area-inset-right));padding-bottom:max(24px,env(safe-area-inset-bottom))}.section-heading{gap:12px}.section-heading .text-button{font-size:12px}.ownership-card p{font-size:12px}}
+@media(prefers-color-scheme:dark){:root{--accent:#b5b8ff;--muted:#b1b4c8;--focus:#c1c4ff}.button.primary{background:#b5b8ff;border-color:#b5b8ff;color:#1a1b30}.page-heading h1 span{color:#a2a6bc}.status{color:#d5d7ee}.square-icon,.purple,.job-icon{color:#b5b8ff}.green{color:#8ee0bc}.orange{color:#ffd08c}}
+@media(prefers-reduced-motion:reduce){button,.button,.nav,dialog,#toast{transition:opacity 120ms linear!important;transform:none!important}#toast{transform:translateX(-50%)!important}html{scroll-behavior:auto!important}}
+@media(forced-colors:active){.button,.nav.active,.download-card,.panel{border:1px solid CanvasText}.icon{forced-color-adjust:auto}}

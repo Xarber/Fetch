@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: AGPL-3.0-only
+import { icon, decorateIcons, actionIcon, actionLabel } from './icons.js';
+import { installMotion, enter } from './motion.js';
+installMotion();
+decorateIcons();
 const $ = (id) => { const el = document.getElementById(id); if (!el)
     throw new Error(`Missing element ${id}`); return el; };
 const input = (id) => $(id);
@@ -20,7 +25,8 @@ function bytes(value) { if (value == null)
 function node(tag, text, cls) { const e = document.createElement(tag); if (text)
     e.textContent = text; if (cls)
     e.className = cls; return e; }
-function button(label, run, cls = 'button') { const b = node('button', label, cls); b.type = 'button'; b.onclick = () => { b.disabled = true; Promise.resolve().then(run).catch(e => toast(String(e.message ?? e))).finally(() => { b.disabled = false; }); }; return b; }
+function button(label, run, cls = 'button') { const b = node('button', label, cls); b.type = 'button'; b.dataset.label = label; const meaning = actionIcon(label); if (meaning)
+    b.prepend(icon(meaning)); b.onclick = () => { b.disabled = true; Promise.resolve().then(run).catch(e => toast(String(e.message ?? e))).finally(() => { b.disabled = false; }); }; return b; }
 async function api(path, method = 'GET', body) {
     if (!token && path !== 'auth/login') {
         $('login-dialog').hidden = false;
@@ -38,7 +44,7 @@ async function api(path, method = 'GET', body) {
     }
     return result;
 }
-function connected(online) { $('connection-dot').classList.toggle('online', online); $('connection-label').textContent = online ? 'Server connected' : 'Not connected'; $('session-button').textContent = token ? 'Sign out' : 'Connect server'; }
+function connected(online) { $('connection-dot').classList.toggle('online', online); $('connection-label').textContent = online ? 'Server connected' : 'Not connected'; actionLabel($('session-button'), token ? 'Sign out' : 'Connect server', token ? 'logout' : 'server'); }
 function navigate(target) {
     if (target === 'ideas' && !developer)
         return;
@@ -51,6 +57,7 @@ function navigate(target) {
     document.querySelectorAll('.view').forEach(e => { e.hidden = e.id !== `view-${target}`; });
     document.querySelectorAll('[data-view]').forEach(e => e.classList.toggle('active', e.dataset.view === target));
     $('breadcrumb').textContent = titles[target] ?? target;
+    enter($('view-' + target));
     if (target === 'ideas')
         renderIdeas();
     if (target === 'server' && token)
@@ -65,15 +72,26 @@ function renderJobs() {
     const sets = { 'recent-jobs': jobs.slice(0, 4), 'queue-jobs': active, 'library-jobs': jobs.filter(j => j.state === 'ready' && j.title.toLowerCase().includes(search)), 'history-jobs': jobs.filter(j => !active.includes(j)) };
     for (const [id, list] of Object.entries(sets)) {
         const container = $(id);
+        const signature = JSON.stringify([list, Boolean(token)]);
+        if (container.dataset.signature === signature)
+            continue;
+        container.dataset.signature = signature;
+        const previous = new Set(Array.from(container.querySelectorAll('[data-job-id]')).map(el => el.dataset.jobId));
+        const focused = document.activeElement instanceof HTMLButtonElement && container.contains(document.activeElement) ? { job: document.activeElement.closest('[data-job-id]')?.dataset.jobId, label: document.activeElement.dataset.label } : null;
         container.replaceChildren();
         if (!list.length) {
             const empty = node('div', undefined, 'empty');
-            empty.append(node('div', '↓', 'empty-symbol'), node('strong', token ? 'Nothing here yet' : 'Your next great find starts here'), node('p', token ? 'New downloads will appear here.' : 'Connect your server, then paste your first link.'));
+            const emptyIcon = node('div', undefined, 'empty-symbol');
+            emptyIcon.append(icon('download'));
+            empty.append(emptyIcon, node('strong', token ? 'Nothing here yet' : 'Your next great find starts here'), node('p', token ? 'New downloads will appear here.' : 'Connect your server, then paste your first link.'));
             container.append(empty);
         }
         for (const job of list) {
             const row = node('article', undefined, 'job');
-            row.append(node('div', job.state === 'ready' ? '✓' : job.state === 'failed' ? '!' : '↓', 'job-icon'));
+            row.dataset.jobId = job.id;
+            const symbol = node('div', undefined, 'job-icon');
+            symbol.append(icon(job.state === 'ready' ? 'check' : job.state === 'failed' ? 'alert' : 'download'));
+            row.append(symbol);
             const body = node('div', undefined, 'job-content');
             body.append(node('h3', job.title));
             const details = [job.progress.stage ?? job.state];
@@ -110,7 +128,11 @@ function renderJobs() {
                 actions.append(button('Move first', async () => { await api(`downloads/${job.id}`, 'PATCH', { priority: 100 }); await refresh(); }));
             row.append(actions);
             container.append(row);
+            if (!previous.has(job.id))
+                enter(row, 'row');
         }
+        if (focused?.job && focused.label)
+            container.querySelector(`[data-job-id="${CSS.escape(focused.job)}"] button[data-label="${CSS.escape(focused.label)}"]`)?.focus({ preventScroll: true });
     }
 }
 async function refresh() { if (!token)
@@ -147,8 +169,73 @@ async function saveFile(job) {
     await api(`transfers/${ticket.id}/complete`, 'POST', { sha256: hash });
     toast('File verified. Your browser will handle saving it.');
 }
-document.querySelectorAll('[data-view]').forEach(e => e.onclick = () => navigate(e.dataset.view ?? 'overview'));
-document.querySelectorAll('[data-go]').forEach(e => e.onclick = () => navigate(e.dataset.go ?? 'overview'));
+const enteredKey = 'fetch.workspace-entered.v1';
+let entered = false;
+try {
+    entered = localStorage.getItem(enteredKey) === 'yes';
+}
+catch { /* Storage may be unavailable. */ }
+function routeWorkspace(target, record = true, focus = true) {
+    if (!Object.hasOwn(titles, target) || (target === 'ideas' && !developer))
+        target = 'overview';
+    $('product').hidden = true;
+    $('workspace').hidden = false;
+    entered = true;
+    try {
+        localStorage.setItem(enteredKey, 'yes');
+    }
+    catch { /* The preference survives this document session. */ }
+    if (record)
+        history.pushState(null, '', target === 'overview' ? '/#app' : '/#' + target);
+    navigate(target);
+    if (focus) {
+        const heading = $('view-' + target).querySelector('h1');
+        if (heading) {
+            heading.tabIndex = -1;
+            heading.focus();
+        }
+    }
+}
+function routeProduct(record = true, focus = true) {
+    document.querySelectorAll('dialog[open]').forEach(dialog => dialog.close());
+    $('workspace').hidden = true;
+    $('product').hidden = false;
+    if (record)
+        history.pushState({ fetchView: 'product' }, '', '/?welcome');
+    enter($('product').querySelector('.hero-copy'));
+    if (focus) {
+        const heading = $('hero-title');
+        heading.tabIndex = -1;
+        heading.focus();
+    }
+}
+function restoreRoute(fromHistory = false) {
+    const route = location.hash.slice(1);
+    if (route === 'app' || Object.hasOwn(titles, route))
+        routeWorkspace(route === 'app' ? 'overview' : route, false, false);
+    else if (new URLSearchParams(location.search).has('welcome') || (fromHistory && history.state?.fetchView === 'product') || !entered || route === 'how' || route === 'platforms')
+        routeProduct(false, false);
+    else
+        routeWorkspace('overview', false, false);
+}
+window.addEventListener('popstate', () => restoreRoute(true));
+window.addEventListener('hashchange', () => restoreRoute(true));
+document.querySelectorAll('[data-open-app], [data-show-product], #product-link').forEach(link => {
+    link.addEventListener('click', event => {
+        if (event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+            return;
+        event.preventDefault();
+        if (link.hasAttribute('data-open-app'))
+            routeWorkspace(view);
+        else
+            routeProduct();
+    });
+});
+document.querySelectorAll('[data-view]').forEach(el => el.onclick = () => routeWorkspace(el.dataset.view ?? 'overview'));
+document.querySelectorAll('[data-go]').forEach(el => el.onclick = () => routeWorkspace(el.dataset.go ?? 'overview'));
+restoreRoute();
+if (!$("product").hidden)
+    history.replaceState({ fetchView: "product" }, "", location.href);
 document.querySelectorAll('[data-close]').forEach(e => e.onclick = () => $(e.dataset.close ?? '').close());
 $('session-button').onclick = () => { if (token) {
     void api('auth/logout', 'POST').finally(() => { token = ''; jobs = []; connected(false); renderJobs(); });
@@ -193,7 +280,7 @@ $('inspect-form').onsubmit = async (e) => {
     }
     finally {
         b.disabled = false;
-        b.textContent = 'Inspect link →';
+        actionLabel(b, 'Inspect link', 'search');
     }
 };
 $('preset').onchange = () => { $('custom-selectors').hidden = $('preset').value !== 'custom'; };
@@ -430,7 +517,8 @@ if ('serviceWorker' in navigator) {
     void navigator.serviceWorker.ready.then(reg => reg.active ? workerRelease(reg.active) : null).then(data => { if (!data)
         return; const previous = localStorage.getItem('fetch.lastWebBuild'); localStorage.setItem('fetch.lastWebBuild', data.webBuild); if (previous && previous !== data.webBuild) {
         renderRelease($('whatsnew-notes'), data);
-        $('whatsnew-dialog').showModal();
+        if (!$('workspace').hidden)
+            $('whatsnew-dialog').showModal();
     } }).catch(() => { });
 }
 $('source-button').onclick = async () => { try {
@@ -449,4 +537,3 @@ $('source-button').onclick = async () => { try {
 catch (error) {
     toast(error.message);
 } };
-export {};

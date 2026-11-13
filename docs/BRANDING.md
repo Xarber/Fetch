@@ -1,6 +1,6 @@
 # Fetch branding
 
-The user supplied the name **Fetch** and tagline **Your media. Your device. Your control.** They are preserved. No global name/trademark clearance is claimed. The existing unrelated public repository named Fetch is not reused; the private development repository is OpenRecode-Fetch.
+The user supplied the name **Fetch** and tagline **Your media. Your device. Your control.** They are preserved. No global name/trademark clearance is claimed. Private OpenRecode-Fetch holds current development. The original Fetch starter is covered by REPOSITORY_REUSE.md.
 
 Accent: `#6269F5`. Highlight: `#8287FF`. Deep violet: `#535AE1`. Light background: `#F7F8FB`. Dark background: `#13141C`. Primary text: `#242638`. Typography is the system sans-serif (SF on Apple platforms), with semantic native text sizes and a restrained web hierarchy.
 

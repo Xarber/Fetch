@@ -15,7 +15,7 @@ Read docs/IDEAS.json at session start. Report pending/approved/deferred counts a
 - web/src: strict TypeScript; build with npm run build. web/app.js is generated and committed for backend/container use.
 - scripts: local runner, test fixtures, backup, branding export, project generation and release metadata.
 
-Use Conventional Commits. Work on testing or isolated branches; integrate into testing before any promotion. beta/main are reserved for validated promotions. No public repositories, releases, external uploads or deployments are authorized by the project specification. CI may prepare private artifacts only. Do not migrate to Android/Expo or build an on-device Python engine without a justified task.
+Use Conventional Commits. Work on testing or isolated branches; integrate into testing before any promotion. beta/main are reserved for validated promotions. X-Center is the default host for private Fetch services. Preserve existing services and keep public exposure, publishing and repository visibility changes subject to explicit authorization. Review docs/REPOSITORY_REUSE.md before touching the original repository. CI may prepare private artifacts only. Do not migrate to Android/Expo or build an on-device Python engine without a justified task.
 
 ## Checks
 
@@ -24,3 +24,7 @@ Run pytest, npm run check and npm run build. Playwright exercises a real local d
 ## Security invariants
 
 No arbitrary yt-dlp/FFmpeg flags, shell execution, file URLs, remote plugins, cookie harvesting or telemetry. Require authorization and source safety; preserve HTTPS validation. A job artifact becomes ready only after local processing, atomic finalization and checksum. Transfer tokens use Authorization headers, never query strings. No sensitive API caching in the service worker. Never silently expand source or distribution policy.
+
+## Web and native experience
+
+Keep the first-visit introduction integrated at the web root with direct workspace links and an in-document return path. Reuse the shared icons and motion tokens. Consult the relevant design and accessibility skills before substantial interface changes. Preserve SwiftUI for the current native client and prefer Expo for new mobile work when it supports the necessary native adapters. Prefer the configured hardware signing key and report unsigned commits when the key is unavailable.

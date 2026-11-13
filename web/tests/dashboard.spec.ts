@@ -4,12 +4,15 @@ import { readFileSync } from 'node:fs';
 
 test('real media workflow, responsive layout, private API and offline shell',async({page,context})=>{
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');
+ await page.goto('/#app');
  await expect(page.getByRole('heading',{name:'Good media. Yours to keep.'})).toBeVisible();
  await page.getByRole('button',{name:'Connect server',exact:true}).click();
  await page.getByLabel('Password',{exact:true}).fill('browser-test-only-password-2026');
  await page.getByRole('button',{name:'Connect securely'}).click();
  await expect(page.getByRole('button',{name:'Sign out',exact:true})).toBeVisible();
+ await page.getByRole('link', {name: 'Fetch home', exact: true}).click();
+ await page.getByRole('link', {name: 'Open your workspace'}).click();
+ await expect(page.getByRole('button', {name: 'Sign out', exact: true})).toBeVisible();
  await page.locator('#source-url').fill(readFileSync('.qa/media-url.txt','utf8'));
  await page.getByRole('button',{name:'Inspect link'}).click();
  await expect(page.locator('#media-dialog')).toBeVisible();

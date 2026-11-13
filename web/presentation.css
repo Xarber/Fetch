@@ -1,0 +1,122 @@
+/* SPDX-License-Identifier: AGPL-3.0-only */
+
+.presentation {color-scheme:light dark;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f7f8fb;color:#242638;--surface:#fff;--line:#e1e3ed;--muted:#626679;--accent:#5057d6}
+.presentation * {box-sizing:border-box}
+body.presentation {margin:0}
+.presentation a {color:var(--accent)}
+.presentation button, .presentation a, .presentation input {touch-action:manipulation}
+.presentation a {text-underline-offset:4px}
+.presentation h1, .presentation h2, .presentation h3, .presentation p {margin-top:0}
+.presentation h1 {font-size:clamp(46px,5.9vw,84px);font-weight:720;letter-spacing:-.055em;line-height:1.07;margin-bottom:25px}
+.presentation h1 em {font-style:normal;color:var(--accent)}
+.presentation h2 {font-size:clamp(30px,3.4vw,46px);font-weight:680;letter-spacing:-.04em;line-height:1.16;margin-bottom:18px}
+.presentation h3 {font-size:20px;letter-spacing:-.02em}
+.presentation p {font-size:16px;line-height:1.8;color:var(--muted)}
+.presentation .icon {width:22px;height:22px;display:inline-block;vertical-align:middle}
+.presentation .site-header, .presentation .site-footer, .presentation main {max-width:1200px;margin:auto;padding-left:32px;padding-right:32px}
+.presentation .site-header {display:flex;align-items:center;justify-content:space-between;min-height:100px;border-bottom:1px solid var(--line);gap:24px}
+.presentation .site-brand {font-size:31px;font-weight:760;letter-spacing:-1.8px;text-decoration:none;color:inherit;display:inline-flex;align-items:center;gap:9px}
+.presentation .site-brand>span {color:var(--accent);margin-left:-6px}
+.presentation .site-header nav {display:flex;align-items:center;gap:30px}
+.presentation .site-header nav>a:not(.button) {font-size:14px;text-decoration:none;min-height:44px;display:flex;align-items:center}
+.presentation .button {display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:48px;padding:13px 20px;text-decoration:none;border:1px solid var(--line);border-radius:11px;background:var(--surface);color:inherit;font-weight:600;font-size:14px}
+.presentation .button.primary {color:#fff;background:var(--accent);border-color:var(--accent)}
+.presentation .eyebrow {font-size:11px;font-weight:700;letter-spacing:.14em;color:var(--accent);display:flex;align-items:center;gap:9px}
+.presentation .status-dot {width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.presentation .hero {display:grid;grid-template-columns:1.4fr 1fr;gap:60px;align-items:center;min-height:620px;padding:70px 0}
+.presentation .hero-description {font-size:18px;max-width:610px}
+.presentation .hero-actions {display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
+.presentation .readiness-note {font-size:12px;display:flex;gap:9px;max-width:550px;margin-top:20px}
+.presentation .readiness-note .icon {width:18px;min-width:18px;height:18px;margin-top:3px}
+.presentation .hero-symbol {height:370px;position:relative;display:grid;place-items:center}
+.presentation .hero-symbol>img {border-radius:22%;box-shadow:0 28px 70px #535ae130;transform:rotate(-7deg);z-index:1}
+.presentation .orbit {position:absolute;width:340px;height:340px;border:1px solid #dcdff2;border-radius:50%}
+.presentation .orbit-two {width:420px;height:420px;opacity:.6}
+.presentation .ownership-tag {display:flex;align-items:center;gap:9px;position:absolute;bottom:3px;right:8px;border:1px solid var(--line);background:var(--surface);padding:13px 18px;border-radius:12px;box-shadow:0 8px 24px #292b4410;z-index:2;font-size:13px}
+.presentation .section {padding:70px 0;border-top:1px solid var(--line)}
+.presentation .section-intro {max-width:640px;margin-bottom:35px}
+.presentation .steps {list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.presentation .steps li {background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:28px;position:relative}
+.presentation .feature-icon {display:flex;width:46px;height:46px;align-items:center;justify-content:center;background:#eeeffe;color:var(--accent);border-radius:13px;margin-bottom:30px}
+.presentation .feature-icon .icon {width:24px;height:24px}
+.presentation .step-number {position:absolute;right:26px;top:31px;font-size:12px;font-weight:600;color:var(--muted)}
+.presentation .steps p {font-size:14px;margin-bottom:0}
+.presentation .screenshot {margin:0;border:1px solid var(--line);border-radius:19px;overflow:hidden;background:var(--surface)}
+.presentation .screenshot img {display:block;width:100%;height:auto;max-height:700px;object-fit:cover;object-position:top}
+.presentation .screenshot figcaption {font-size:12px;color:var(--muted);padding:17px 22px;line-height:1.7;border-top:1px solid var(--line)}
+.presentation .principles {display:grid;grid-template-columns:1fr 1.2fr;gap:100px}
+.presentation .principle-list {list-style:none;margin:0;padding:0}
+.presentation .principle-list li {display:flex;gap:18px;margin-bottom:26px}
+.presentation .principle-list .icon {flex-shrink:0;color:var(--accent);margin-top:3px}
+.presentation .principle-list h3 {font-size:18px;margin-bottom:9px}
+.presentation .principle-list p {font-size:14px;margin-bottom:0}
+.presentation .platform-grid {display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+.presentation .platform-grid article {padding:8px 0}
+.presentation .platform-grid p {font-size:14px}
+.presentation .platform-grid a {font-size:14px;display:inline-flex;align-items:center;gap:8px;min-height:44px}
+.presentation .platform-grid .feature-icon {margin-bottom:22px}
+.presentation .readiness {display:flex;gap:25px;background:#eeeffa;padding:32px;border-radius:20px;margin:30px 0 80px;border:1px solid #dedff0}
+.presentation .readiness .feature-icon {flex-shrink:0;background:var(--surface)}
+.presentation .readiness h2 {font-size:27px}
+.presentation .readiness p {font-size:14px}
+.presentation .site-footer {display:flex;align-items:center;gap:25px;border-top:1px solid var(--line);padding-top:28px;padding-bottom:28px;flex-wrap:wrap}
+.presentation .site-footer p {font-size:12px;flex:1;margin:0}
+.presentation .site-footer>a:not(.site-brand) {font-size:13px;min-height:44px;display:flex;align-items:center}
+.presentation .guide {max-width:850px;padding-top:65px;padding-bottom:60px}
+.presentation .guide h1 {font-size:60px}
+.presentation .guide-section {padding:35px 0;border-bottom:1px solid var(--line)}
+.presentation .guide-section h2 {font-size:29px;display:flex;align-items:center;gap:14px}
+.presentation .guide-section h3 {margin-top:25px}
+.presentation .guide-section pre {padding:22px;background:var(--surface);border:1px solid var(--line);border-radius:13px;overflow:auto;font-size:13px;line-height:1.9;color:inherit}
+.presentation .guide-section p code {font-size:.9em;background:var(--surface);border:1px solid var(--line);border-radius:5px;padding:2px 5px;overflow-wrap:anywhere}
+.presentation .skip-link {position:absolute;left:15px;top:8px;transform:translateY(-180%);padding:12px;background:var(--surface);z-index:10}
+.presentation .skip-link:focus {transform:none}
+.presentation .site-header a:focus-visible, .presentation .site-footer a:focus-visible {outline:3px solid var(--accent);outline-offset:4px}
+@media(max-width:850px){
+.presentation .hero {gap:20px;grid-template-columns:1.5fr 1fr}
+.presentation .hero-symbol {height:300px}
+.presentation .hero-symbol>img {width:165px;height:165px}
+.presentation .orbit {width:230px;height:230px}
+.presentation .orbit-two {width:280px;height:280px}
+.presentation .ownership-tag {right:0;font-size:11px}
+.presentation .steps {gap:14px}
+.presentation .steps li {padding:23px}
+.presentation .principles {gap:45px}
+.presentation .platform-grid {gap:20px}}
+@media(max-width:650px){
+.presentation .site-header, .presentation .site-footer, .presentation main {padding-left:max(22px,env(safe-area-inset-left));padding-right:max(22px,env(safe-area-inset-right))}
+.presentation .site-header {min-height:82px;gap:12px}
+.presentation .site-brand {font-size:27px}
+.presentation .site-header nav {gap:13px}
+.presentation .site-header nav>a:not(.button) {font-size:12px}
+.presentation .site-header nav>a[href="#how"] {display:none}
+.presentation .site-header .button {font-size:12px;padding:10px 12px}
+.presentation .hero {grid-template-columns:1fr;padding:48px 0 40px;gap:35px}
+.presentation .hero-symbol {height:270px}
+.presentation .hero-symbol>img {width:160px;height:160px}
+.presentation .orbit {width:225px;height:225px}
+.presentation .orbit-two {width:270px;height:270px}
+.presentation .ownership-tag {right:calc(50% - 145px);bottom:0;font-size:12px}
+.presentation .hero-description {font-size:16px}
+.presentation .hero-actions {gap:10px}
+.presentation .hero-actions .button {font-size:13px;padding:13px 15px}
+.presentation .steps, .presentation .platform-grid, .presentation .principles {grid-template-columns:1fr}
+.presentation .steps {gap:15px}
+.presentation .section {padding:45px 0}
+.presentation .feature-icon {margin-bottom:22px}
+.presentation .principles {gap:20px}
+.presentation .platform-grid {gap:24px}
+.presentation .readiness {padding:24px;gap:16px;display:block;margin-bottom:50px}
+.presentation .screenshot img {max-height:420px}
+.presentation .screenshot figcaption {padding:14px 18px}
+.presentation .site-footer {gap:14px}
+.presentation .site-footer p {flex-basis:100%;order:2}
+.presentation .guide {padding-top:45px}
+.presentation .guide h1 {font-size:46px}
+.presentation .guide-section pre {font-size:12px;padding:17px}}
+@media(prefers-color-scheme:dark){
+.presentation {background:#13141c;color:#e6e7f2;--surface:#1b1c28;--line:#33354a;--muted:#b1b4c8;--accent:#b5b8ff}
+.presentation .orbit {border-color:#343753}
+.presentation .feature-icon {background:#29294b}
+.presentation .readiness {background:#202132;border-color:#34364f}
+.presentation .hero-symbol>img {box-shadow:0 28px 70px #6269f525}}

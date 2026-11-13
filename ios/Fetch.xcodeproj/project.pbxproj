@@ -11,6 +11,7 @@
 		040E5BB7769A3AF844749D1F /* Ideas.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D611ED64E69E7CD636DA5A6 /* Ideas.swift */; };
 		2CD293975A54CA50A53E8C99 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 74C139371EE0CC764C53654A /* PrivacyInfo.xcprivacy */; };
 		431DA06E62F278DA3AD4F86C /* Views.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7B9B23368915D6E900F39E4 /* Views.swift */; };
+		CAF03942D13A40F6B736E104 /* FetchMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAF03942D13A40F6B736E105 /* FetchMotion.swift */; };
 		53D6CB8F0BDD9684795E94AC /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A1CA63A41919584A0E75EE9 /* APIClient.swift */; };
 		62A581DB65F3F0781F3A0E2F /* PairingScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F4799E651215849747657C1 /* PairingScanner.swift */; };
 		6C8718E93A10788AADC04901 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84590A699E540235AF10CC03 /* Foundation.framework */; };
@@ -71,6 +72,7 @@
 		CD7CFDB5A44C104B560CF157 /* Updates.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Updates.swift; sourceTree = "<group>"; };
 		D48769D53250BF46DAE4CE5B /* ReleaseMetadata.json */ = {isa = PBXFileReference; includeInIndex = 1; name = ReleaseMetadata.json; path = Fetch/ReleaseMetadata.json; sourceTree = "<group>"; };
 		D7B9B23368915D6E900F39E4 /* Views.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Views.swift; sourceTree = "<group>"; };
+		CAF03942D13A40F6B736E105 /* FetchMotion.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FetchMotion.swift; sourceTree = "<group>"; };
 		F6FB047416352CC853DD69CB /* FetchApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FetchApp.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -115,6 +117,7 @@
 				690DCDDA1E344896B9FA3306 /* Transfers.swift */,
 				CD7CFDB5A44C104B560CF157 /* Updates.swift */,
 				D7B9B23368915D6E900F39E4 /* Views.swift */,
+				CAF03942D13A40F6B736E105 /* FetchMotion.swift */,
 			);
 			name = Fetch;
 			path = Fetch;
@@ -282,6 +285,7 @@
 				FF1339FB962EEEF3F646BDD2 /* Transfers.swift in Sources */,
 				973BB9BE99B4B52E242E105B /* Updates.swift in Sources */,
 				431DA06E62F278DA3AD4F86C /* Views.swift in Sources */,
+				CAF03942D13A40F6B736E104 /* FetchMotion.swift in Sources */,
 				040E5BB7769A3AF844749D1F /* Ideas.swift in Sources */,
 				C8EF1B1220A61B7B0375A623 /* Models.swift in Sources */,
 			);

@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-export {};
+import {icon,decorateIcons,actionIcon,actionLabel} from './icons.js';
+import {installMotion,enter} from './motion.js';
+installMotion();decorateIcons();
 type Job = {id:string;title:string;state:string;created:number;version:number;size:number|null;error:string|null;progress:{stage?:string;downloaded_bytes?:number;total_bytes?:number;speed?:number;eta?:number;total_estimated?:boolean}};
 type Format = {format_id:string;ext?:string;height?:number;vcodec?:string;acodec?:string;filesize?:number;filesize_approx?:number};
 type Inspection = {id:string;title:string;source?:string;creator?:string;duration?:number;formats:Format[]};
@@ -14,7 +16,7 @@ let toastTimer:ReturnType<typeof setTimeout>;
 function toast(message:string){$('toast').textContent=message; $('toast').hidden=false; clearTimeout(toastTimer); toastTimer=setTimeout(()=>{$('toast').hidden=true;},6500);}
 function bytes(value:number|null|undefined):string {if(value==null) return 'Unknown'; if(value<1024)return `${value} B`; const i=Math.min(3,Math.floor(Math.log(value)/Math.log(1024)));return `${(value/1024**i).toFixed(i===3?1:0)} ${['B','KB','MB','GB'][i]}`;}
 function node<K extends keyof HTMLElementTagNameMap>(tag:K,text?:string,cls?:string):HTMLElementTagNameMap[K]{const e=document.createElement(tag);if(text)e.textContent=text;if(cls)e.className=cls;return e;}
-function button(label:string,run:()=>Promise<void>|void,cls='button'):HTMLButtonElement {const b=node('button',label,cls);b.type='button'; b.onclick=()=>{b.disabled=true;Promise.resolve().then(run).catch(e=>toast(String(e.message??e))).finally(()=>{b.disabled=false;});};return b;}
+function button(label:string,run:()=>Promise<void>|void,cls='button'):HTMLButtonElement {const b=node('button',label,cls);b.type='button';b.dataset.label=label;const meaning=actionIcon(label);if(meaning)b.prepend(icon(meaning)); b.onclick=()=>{b.disabled=true;Promise.resolve().then(run).catch(e=>toast(String(e.message??e))).finally(()=>{b.disabled=false;});};return b;}
 async function api<T>(path:string,method='GET',body?:unknown):Promise<T>{
  if(!token && path!=='auth/login'){ $('login-dialog').hidden=false; $<HTMLDialogElement>('login-dialog').showModal(); throw new Error('Connect to your server first.'); }
  const response=await fetch(`/api/v1/${path}`,{method,headers:{'Content-Type':'application/json',...(token?{Authorization:`Bearer ${token}`}:{})},body:body===undefined?undefined:JSON.stringify(body),cache:'no-store'});
@@ -22,13 +24,13 @@ async function api<T>(path:string,method='GET',body?:unknown):Promise<T>{
  if(!response.ok){if(response.status===401&&path!=='auth/login'){token='';connected(false);}throw new Error(typeof result.detail==='string'?result.detail:`Request failed (${response.status})`);}
  return result as T;
 }
-function connected(online:boolean){$('connection-dot').classList.toggle('online',online);$('connection-label').textContent=online?'Server connected':'Not connected';$('session-button').textContent=token?'Sign out':'Connect server';}
+function connected(online:boolean){$('connection-dot').classList.toggle('online',online);$('connection-label').textContent=online?'Server connected':'Not connected';actionLabel($('session-button'),token?'Sign out':'Connect server',token?'logout':'server');}
 function navigate(target:string){
  if(target==='ideas'&&!developer)return;
  if(view!==target&&target!=='ideas'){developer=false;taps=0;$('ideas-nav').hidden=true;}
  view=target; document.querySelectorAll<HTMLElement>('.view').forEach(e=>{e.hidden=e.id!==`view-${target}`;});
  document.querySelectorAll<HTMLElement>('[data-view]').forEach(e=>e.classList.toggle('active',e.dataset.view===target));
- $('breadcrumb').textContent=titles[target]??target;
+ $('breadcrumb').textContent=titles[target]??target;enter($('view-'+target));
  if(target==='ideas')renderIdeas();
  if(target==='server'&&token)void diagnostics().catch(e=>toast(e.message));
 }
@@ -38,10 +40,10 @@ function renderJobs(){
  const search=input('library-search').value.toLowerCase();
  const sets:Record<string,Job[]>={'recent-jobs':jobs.slice(0,4),'queue-jobs':active,'library-jobs':jobs.filter(j=>j.state==='ready'&&j.title.toLowerCase().includes(search)),'history-jobs':jobs.filter(j=>!active.includes(j))};
  for(const [id,list] of Object.entries(sets)){
-  const container=$(id);container.replaceChildren();
-  if(!list.length){const empty=node('div',undefined,'empty');empty.append(node('div','↓','empty-symbol'),node('strong',token?'Nothing here yet':'Your next great find starts here'),node('p',token?'New downloads will appear here.':'Connect your server, then paste your first link.'));container.append(empty);}
+  const container=$(id);const signature=JSON.stringify([list,Boolean(token)]);if(container.dataset.signature===signature)continue;container.dataset.signature=signature;const previous=new Set(Array.from(container.querySelectorAll<HTMLElement>('[data-job-id]')).map(el=>el.dataset.jobId));const focused=document.activeElement instanceof HTMLButtonElement&&container.contains(document.activeElement)?{job:document.activeElement.closest<HTMLElement>('[data-job-id]')?.dataset.jobId,label:document.activeElement.dataset.label}:null;container.replaceChildren();
+  if(!list.length){const empty=node('div',undefined,'empty');const emptyIcon=node('div',undefined,'empty-symbol');emptyIcon.append(icon('download'));empty.append(emptyIcon,node('strong',token?'Nothing here yet':'Your next great find starts here'),node('p',token?'New downloads will appear here.':'Connect your server, then paste your first link.'));container.append(empty);}
   for(const job of list){
-   const row=node('article',undefined,'job');row.append(node('div',job.state==='ready'?'✓':job.state==='failed'?'!':'↓','job-icon'));
+   const row=node('article',undefined,'job');row.dataset.jobId=job.id;const symbol=node('div',undefined,'job-icon');symbol.append(icon(job.state==='ready'?'check':job.state==='failed'?'alert':'download'));row.append(symbol);
    const body=node('div',undefined,'job-content');body.append(node('h3',job.title));
    const details=[job.progress.stage??job.state];
    if(job.progress.downloaded_bytes!=null)details.push(`${bytes(job.progress.downloaded_bytes)}${job.progress.total_bytes?` / ${job.progress.total_estimated?'≈ ':''}${bytes(job.progress.total_bytes)}`:''}`);
@@ -58,8 +60,9 @@ function renderJobs(){
    }
    if(['ready','failed','cancelled','expired','paused'].includes(job.state)) actions.append(button('Remove',async()=>{if(confirm('Delete this server artifact and history entry? This cannot be undone.')){await api(`downloads/${job.id}`,'DELETE');await refresh();}}));
    if(job.state==='queued')actions.append(button('Move first',async()=>{await api(`downloads/${job.id}`,'PATCH',{priority:100});await refresh();}));
-   row.append(actions);container.append(row);
+   row.append(actions);container.append(row);if(!previous.has(job.id))enter(row,'row');
   }
+  if(focused?.job&&focused.label)container.querySelector<HTMLButtonElement>(`[data-job-id="${CSS.escape(focused.job)}"] button[data-label="${CSS.escape(focused.label)}"]`)?.focus({preventScroll:true});
  }
 }
 async function refresh(){if(!token)return;try{jobs=await api<Job[]>('downloads');const status=await api<{storage:{free:number};worker_online:boolean}>('status');$('stat-storage').textContent=bytes(status.storage.free);connected(true);if(!status.worker_online)$('connection-label').textContent='Worker offline';renderJobs();}catch{connected(false);}}
@@ -74,8 +77,57 @@ async function saveFile(job:Job){
  const url=URL.createObjectURL(new Blob([data],{type:response.headers.get('Content-Type')??'application/octet-stream'}));const a=node('a');a.href=url;a.download=ticket.filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),60_000);
  await api(`transfers/${ticket.id}/complete`,'POST',{sha256:hash});toast('File verified. Your browser will handle saving it.');
 }
-document.querySelectorAll<HTMLElement>('[data-view]').forEach(e=>e.onclick=()=>navigate(e.dataset.view??'overview'));
-document.querySelectorAll<HTMLElement>('[data-go]').forEach(e=>e.onclick=()=>navigate(e.dataset.go??'overview'));
+const enteredKey = 'fetch.workspace-entered.v1';
+let entered = false;
+try { entered = localStorage.getItem(enteredKey) === 'yes'; } catch { /* Storage may be unavailable. */ }
+
+function routeWorkspace(target: string, record = true, focus = true): void {
+ if (!Object.hasOwn(titles, target) || (target === 'ideas' && !developer)) target = 'overview';
+ $('product').hidden = true;
+ $('workspace').hidden = false;
+ entered = true;
+ try { localStorage.setItem(enteredKey, 'yes'); } catch { /* The preference survives this document session. */ }
+ if (record) history.pushState(null, '', target === 'overview' ? '/#app' : '/#' + target);
+ navigate(target);
+ if (focus) {
+  const heading = $('view-' + target).querySelector('h1');
+  if (heading) { heading.tabIndex = -1; heading.focus(); }
+ }
+}
+
+function routeProduct(record = true, focus = true): void {
+ document.querySelectorAll<HTMLDialogElement>('dialog[open]').forEach(dialog => dialog.close());
+ $('workspace').hidden = true;
+ $('product').hidden = false;
+ if (record) history.pushState({ fetchView: 'product' }, '', '/?welcome');
+ enter($('product').querySelector<HTMLElement>('.hero-copy')!);
+ if (focus) {
+  const heading = $('hero-title');
+  heading.tabIndex = -1;
+  heading.focus();
+ }
+}
+
+function restoreRoute(fromHistory = false): void {
+ const route = location.hash.slice(1);
+ if (route === 'app' || Object.hasOwn(titles, route)) routeWorkspace(route === 'app' ? 'overview' : route, false, false);
+ else if (new URLSearchParams(location.search).has('welcome') || (fromHistory && history.state?.fetchView === 'product') || !entered || route === 'how' || route === 'platforms') routeProduct(false, false);
+ else routeWorkspace('overview', false, false);
+}
+window.addEventListener('popstate', () => restoreRoute(true));
+window.addEventListener('hashchange', () => restoreRoute(true));
+document.querySelectorAll<HTMLAnchorElement>('[data-open-app], [data-show-product], #product-link').forEach(link => {
+ link.addEventListener('click', event => {
+  if (event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  event.preventDefault();
+  if (link.hasAttribute('data-open-app')) routeWorkspace(view);
+  else routeProduct();
+ });
+});
+document.querySelectorAll<HTMLElement>('[data-view]').forEach(el => el.onclick = () => routeWorkspace(el.dataset.view ?? 'overview'));
+document.querySelectorAll<HTMLElement>('[data-go]').forEach(el => el.onclick = () => routeWorkspace(el.dataset.go ?? 'overview'));
+restoreRoute();
+if (!$("product").hidden) history.replaceState({ fetchView: "product" }, "", location.href);
 document.querySelectorAll<HTMLElement>('[data-close]').forEach(e=>e.onclick=()=> $<HTMLDialogElement>(e.dataset.close??'').close());
 $('session-button').onclick=()=>{if(token){void api('auth/logout','POST').finally(()=>{token='';jobs=[];connected(false);renderJobs();});}else $<HTMLDialogElement>('login-dialog').showModal();};
 $('login-form').onsubmit=async e=>{e.preventDefault();$('login-error').textContent='';try{const result=await api<{token:string}>('auth/login','POST',{username:input('username').value,password:input('password').value,device_name:'Fetch Web'});token=result.token;input('password').value='';$<HTMLDialogElement>('login-dialog').close();await refresh();}catch(error){$('login-error').textContent=(error as Error).message;}};
@@ -87,7 +139,7 @@ $('inspect-form').onsubmit=async e=>{
   $('format-id').replaceChildren();$('audio-id').replaceChildren(new Option('None',''));$('format-details').replaceChildren();
   for(const f of inspected.formats){const label=[f.format_id,f.ext,f.height?`${f.height}p`:null,f.vcodec,f.acodec].filter(Boolean).join(' · ');$<HTMLSelectElement>('format-id').add(new Option(label,f.format_id));if(f.vcodec==='none')$<HTMLSelectElement>('audio-id').add(new Option(label,f.format_id));$('format-details').append(node('p',label));}
   input('authorized').checked=false;$<HTMLDialogElement>('media-dialog').showModal();
- }catch(error){toast((error as Error).message);}finally{b.disabled=false;b.textContent='Inspect link →';}
+ }catch(error){toast((error as Error).message);}finally{b.disabled=false;actionLabel(b,'Inspect link','search');}
 };
 $('preset').onchange=()=>{$('custom-selectors').hidden=$<HTMLSelectElement>('preset').value!=='custom';};
 $('download-form').onsubmit=async e=>{e.preventDefault();if(!inspected)return;const b=$<HTMLButtonElement>('queue-button');b.disabled=true;try{
@@ -152,6 +204,6 @@ window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();ins
 interface ReleaseData {version:string;date:string;highlights?:{icon:string;text:string}[];fixes?:string[];webBuild:string}
 function workerRelease(worker:ServiceWorker):Promise<ReleaseData>{return new Promise((resolve,reject)=>{const channel=new MessageChannel();const timer=setTimeout(()=>reject(new Error('Release details unavailable')),3000);channel.port1.onmessage=e=>{clearTimeout(timer);resolve(e.data as ReleaseData);};worker.postMessage({type:'RELEASE_METADATA'},[channel.port2]);});}
 function renderRelease(container:HTMLElement,data:ReleaseData){container.replaceChildren();container.append(node('h3',`Fetch ${data.version}`));const icons:Record<string,string>={'server.rack':'▤','folder':'▣','arrow.down.circle':'↓'};for(const item of data.highlights??[])container.append(node('p',`${icons[item.icon]??'✦'} ${item.text}`));const details=node('details');details.append(node('summary','Fixes & Improvements'));for(const text of data.fixes??[])details.append(node('p',text));container.append(details);}
-if('serviceWorker' in navigator){void navigator.serviceWorker.ready.then(reg=>reg.active?workerRelease(reg.active):null).then(data=>{if(!data)return;const previous=localStorage.getItem('fetch.lastWebBuild');localStorage.setItem('fetch.lastWebBuild',data.webBuild);if(previous&&previous!==data.webBuild){renderRelease($('whatsnew-notes'),data);$<HTMLDialogElement>('whatsnew-dialog').showModal();}}).catch(()=>{/* Offline/restricted storage does not block the app. */});}
+if('serviceWorker' in navigator){void navigator.serviceWorker.ready.then(reg=>reg.active?workerRelease(reg.active):null).then(data=>{if(!data)return;const previous=localStorage.getItem('fetch.lastWebBuild');localStorage.setItem('fetch.lastWebBuild',data.webBuild);if(previous&&previous!==data.webBuild){renderRelease($('whatsnew-notes'),data);if (!$('workspace').hidden) $<HTMLDialogElement>('whatsnew-dialog').showModal();}}).catch(()=>{/* Offline/restricted storage does not block the app. */});}
 
 $('source-button').onclick=async()=>{try{if(!token)throw new Error('Connect before downloading this server’s corresponding source.');const response=await fetch('/api/v1/source',{headers:{Authorization:`Bearer ${token}`},cache:'no-store'});if(!response.ok)throw new Error('The server administrator has not prepared a source archive for this revision.');const url=URL.createObjectURL(await response.blob());const link=node('a');link.href=url;link.download='Fetch-corresponding-source.tar.gz';link.click();setTimeout(()=>URL.revokeObjectURL(url),2000);}catch(error){toast((error as Error).message);}};

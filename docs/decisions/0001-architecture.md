@@ -1,6 +1,6 @@
 # Architecture decision: native client and isolated worker
 
-Fetch is a new project. SwiftUI is the primary client because background URLSession, Keychain, Quick Look, Photos, document export, and a Share Extension are essential. No JavaScript runtime is embedded on iOS. iOS 17 is the initial minimum; system materials provide older-system fallbacks.
+Fetch implementation began in an empty local workspace. The original Expo starter was subsequently confirmed to be part of the same project. See [repository reuse](../REPOSITORY_REUSE.md). SwiftUI is the primary client because background URLSession, Keychain, Quick Look, Photos, document export, and a Share Extension are essential. No JavaScript runtime is embedded on iOS. iOS 17 is the initial minimum; system materials provide older-system fallbacks.
 
 FastAPI and a dedicated Python worker share a WAL SQLite database on one host. A singleton coordinator claims durable jobs; each job runs in a separate process group. This is deliberately not a distributed multi-host queue. API inspection runs in a bounded subprocess. Native and web clients use the same versioned API; transfer state is separate from processing state.
 

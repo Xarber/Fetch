@@ -2,7 +2,7 @@
 
 No stable/prerelease has been published, no public update source exists, and no deployment has occurred. Native build workflows are prepared but have not run. Android APK/AAB are not applicable because Android is not a supported target in this specification.
 
-The private repository is Xarber/OpenRecode-Fetch. `testing` receives development; beta/main begin at the governance-only baseline until explicit validated promotion. No full build/release is automatically triggered on testing. Pull requests targeting beta/main can run checks; testing remains manual for these full checks; native builds are manual or run on beta/main. Existing unrelated Xarber/Fetch remains untouched.
+The private repository is Xarber/OpenRecode-Fetch. `testing` receives development; beta/main begin at the governance-only baseline until explicit validated promotion. No full build/release is automatically triggered on testing. Pull requests targeting beta/main can run checks; testing remains manual for these full checks; native builds are manual or run on beta/main. See REPOSITORY_REUSE.md for the original Fetch repository and the prepared integration.
 
 `checks.yml` prepares Python fixtures, strict TypeScript and Docker build checks. `ios.yml` runs unsigned device and simulator jobs in parallel with fail-fast disabled, uploads each successful artifact and requires both jobs for validation. Metadata uses release.json version/build and the exact commit. The package validator inspects IPA Payload structure, app/extension IDs, platform markers, arm64, version and commit. SHA-256 and sizes are generated only after both artifacts exist.
 

@@ -179,7 +179,7 @@ struct QueueView: View {
                     }
                 }
             }
-        }.navigationTitle("Downloads").refreshable { await store.refresh() }
+        }.navigationTitle("Downloads").fetchListMotion(value:store.jobs.map(\.id)).refreshable { await store.refresh() }
     }
 }
 struct JobDetailView: View {

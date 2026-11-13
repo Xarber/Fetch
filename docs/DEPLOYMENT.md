@@ -1,6 +1,6 @@
 # Deployment and rollback
 
-No deployment has been performed. Docker is unavailable in the implementation environment; these files require actual container validation before production use.
+X-Center is the default host. Use a dedicated Compose project, a separate volume, and a loopback-only port for private staging. Access it through an authenticated SSH tunnel.
 
 ## Hosts
 
@@ -10,7 +10,7 @@ Run README configuration, then `docker compose build` and `docker compose up -d`
 
 ## Network
 
-Only `127.0.0.1:8000` is published. Terminate HTTPS with your own Caddy/nginx reverse proxy and a trusted certificate. Proxy to that local port, preserve Range/ETag and streaming responses, disable response buffering for SSE, and set request body limits (128 KiB). Never expose plain HTTP login over an untrusted network. iOS rejects remote HTTP endpoints.
+The default bind is `127.0.0.1:8000`. Set `FETCH_PORT` to use a different loopback port. Terminate HTTPS with your own Caddy/nginx reverse proxy and a trusted certificate. Proxy to that local port, preserve Range/ETag and streaming responses, disable response buffering for SSE, and set request body limits (128 KiB). Never expose plain HTTP login over an untrusted network. iOS rejects remote HTTP endpoints.
 
 Application egress pinning is meaningful SSRF protection, but Internet-facing hostile workloads additionally need **host-managed egress firewall policy** blocking private/link-local/reserved ranges for API and worker. No host firewall changes were made automatically. Permit required DNS and public HTTPS carefully. Do not set FETCH_TEST_ORIGIN in deployment; it bypasses one exact destination only for isolated tests. This configuration is not a hardened multi-tenant hosting platform.
 
@@ -18,7 +18,7 @@ Application egress pinning is meaningful SSRF protection, but Internet-facing ho
 
 1. Record current commit, image digest, configuration and volume.
 2. Stop the worker and take a protected backup.
-3. Build the intended commit image with `FETCH_COMMIT` set to its full hash.
+3. Build from a tracked snapshot with `FETCH_COMMIT` and `FETCH_IMAGE_TAG` set to its full hash. Point `FETCH_ENV_FILE` at an external, mode-0600 dotenv file. Keep the previous tagged image for rollback.
 4. Stage against a separate volume/port; run authorized fixture, authentication, SSRF, processing and Range checks.
 5. Recreate only Fetch API/worker with the validated image; preserve data.
 6. Verify `/health`, authenticated `/versions`, worker heartbeat and actual job/transfer workflow through the HTTPS endpoint.

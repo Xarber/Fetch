@@ -4,8 +4,8 @@ x-common: &common
     context: .
     args:
       FETCH_COMMIT: ${FETCH_COMMIT:-development}
-  image: openrecode-fetch:local
-  env_file: .env
+  image: openrecode-fetch:${FETCH_IMAGE_TAG:-local}
+  env_file: ${FETCH_ENV_FILE:-.env}
   environment:
     FETCH_DATA: /data
   volumes:
@@ -27,7 +27,7 @@ x-common: &common
 services:
   api:
     <<: *common
-    ports: ["127.0.0.1:8000:8000"]
+    ports: ["127.0.0.1:${FETCH_PORT:-8000}:8000"]
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health',timeout=3)"]
       interval: 30s

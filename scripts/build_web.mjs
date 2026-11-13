@@ -10,7 +10,7 @@ await writeFile(new URL('ios/Fetch/ReleaseMetadata.json',root),release);
 const worker=await readFile(new URL('web/sw.js',root),'utf8');
 const hash=createHash('sha256');
 hash.update(worker.replace(/const CACHE='[^']+';/,"const CACHE='';"));
-for(const name of ['index.html','app.js','style.css','manifest.webmanifest','icon.svg','release.json'])hash.update(await readFile(new URL('web/'+name,root)));
+for(const name of ['index.html','app.js','style.css','manifest.webmanifest','icon.svg','release.json','design.css','icons.js','motion.js','presentation.js','presentation.css','guide/index.html','screenshots/dashboard-desktop.png','screenshots/dashboard-mobile.png'])hash.update(await readFile(new URL('web/'+name,root)));
 const file=new URL('web/sw.js',root);
 const source=await readFile(file,'utf8');
 await writeFile(file,source.replace(/const CACHE='[^']+';/,`const CACHE='fetch-shell-${hash.digest('hex').slice(0,16)}';`));

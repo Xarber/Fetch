@@ -8,6 +8,7 @@
 - [yt-dlp](YTDLP.md), [FFmpeg](FFMPEG.md), [downloads](DOWNLOADS.md), [file transfer](FILE_TRANSFER.md).
 - [Deployment and backup](DEPLOYMENT.md), [security](SECURITY.md), [privacy](PRIVACY.md).
 - [Branding](BRANDING.md), [Ideas](features/IDEAS.md), [PWA](features/PWA.md), [release detection](features/UPDATES.md).
+- [Web experience](features/WEB_EXPERIENCE.md) and [repository reuse](REPOSITORY_REUSE.md).
 - [Roadmap and optional local engine](ROADMAP.md).
 
 No implementation is a published release. In particular, native behavior is pending Xcode/device validation.
