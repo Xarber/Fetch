@@ -36,8 +36,7 @@ jobs:
               echo 'FETCH_SERVER_URL must be an HTTPS origin' >&2
               exit 1
             fi
-            printf 'FETCH_SERVER_URL=%s
-' "$endpoint" >> "$GITHUB_ENV"
+            printf 'FETCH_SERVER_URL=%s\n' "$endpoint" >> "$GITHUB_ENV"
           else
             echo 'FETCH_SERVER_URL=' >> "$GITHUB_ENV"
           fi
