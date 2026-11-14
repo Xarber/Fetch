@@ -26,7 +26,7 @@ struct TransferRecord: Codable, Identifiable {
     private var finishedEvents = false
     var completionHandler: (() -> Void)?
     var tasks: [String: URLSessionDownloadTask] = [:]
-    private lazy var session: URLSession = {
+    @ObservationIgnored private lazy var session: URLSession = {
         let config = URLSessionConfiguration.background(withIdentifier: "org.openrecode.fetch.transfers")
         config.sessionSendsLaunchEvents = true
         config.allowsCellularAccess = !UserDefaults.standard.bool(forKey: "wifiOnly")
