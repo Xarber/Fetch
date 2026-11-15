@@ -1,0 +1,74 @@
+{
+  "UADS-GIT-001": {
+    "title": "Repository continuity and integration",
+    "section": "6\u20137",
+    "verification": "Review history and testing branch",
+    "reference": "docs/REPOSITORY_REUSE.md"
+  },
+  "UADS-CI-001": {
+    "title": "Parallel native builds and artifact validation",
+    "section": "8\u20139",
+    "verification": "Execute iOS workflow",
+    "reference": ".github/workflows/ios.yml"
+  },
+  "UADS-UI-001": {
+    "title": "Accessible interface and reduced motion",
+    "section": "17\u201318,36,42",
+    "verification": "Browser and manual accessibility checks",
+    "reference": "docs/TESTING.md"
+  },
+  "UADS-UI-002": {
+    "title": "Landing onboarding and real platform screenshots",
+    "section": "36\u201337",
+    "verification": "Verify first launch, replay and capture",
+    "reference": "docs/features/WEB_EXPERIENCE.md"
+  },
+  "UADS-DEV-001": {
+    "title": "Developer Options, Ideas and sample isolation",
+    "section": "15,20,35,37",
+    "verification": "Verify activation, isolation and export",
+    "reference": "docs/features/IDEAS.md"
+  },
+  "UADS-DEV-002": {
+    "title": "Managed endpoints and developer switching",
+    "section": "38",
+    "verification": "Validate origin, authentication isolation and reset",
+    "reference": "docs/DEPLOYMENT.md"
+  },
+  "UADS-DIST-001": {
+    "title": "Live downloads, PWA installation and distribution",
+    "section": "25,32,39",
+    "verification": "Verify published metadata and install links",
+    "reference": "docs/RELEASES.md"
+  },
+  "UADS-REL-001": {
+    "title": "Recoverable release and post-publication validation",
+    "section": "40,44",
+    "verification": "Verify artifacts, receipts and recovery",
+    "reference": "docs/RELEASES.md"
+  },
+  "UADS-SEC-001": {
+    "title": "Authorization and network trust boundaries",
+    "section": "21,43",
+    "verification": "Run backend authorization tests and dependency audits",
+    "reference": "docs/SECURITY.md"
+  },
+  "UADS-OPS-001": {
+    "title": "Production readiness and backup recovery",
+    "section": "24,45",
+    "verification": "Check worker, storage and isolated restore",
+    "reference": "docs/DEPLOYMENT.md"
+  },
+  "UADS-QA-001": {
+    "title": "Automated quality and evidence gates",
+    "section": "41\u201342,46\u201350",
+    "verification": "Validate manifest and execute checks",
+    "reference": ".github/workflows/checks.yml"
+  },
+  "UADS-QA-002": {
+    "title": "Persistent ordered task queue",
+    "section": "51\u201352",
+    "verification": "Reconcile open tasks against evidence",
+    "reference": "docs/ACTIVE_TASKS.md"
+  }
+}

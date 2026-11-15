@@ -28,3 +28,7 @@ No arbitrary yt-dlp/FFmpeg flags, shell execution, file URLs, remote plugins, co
 ## Web and native experience
 
 Keep the first-visit introduction integrated at the web root with direct workspace links and an in-document return path. Reuse the shared icons and motion tokens. Consult the relevant design and accessibility skills before substantial interface changes. Preserve SwiftUI for the current native client and prefer Expo for new mobile work when it supports the necessary native adapters. Prefer the configured hardware signing key and report unsigned commits when the key is unavailable.
+
+## UADS verification
+
+Read `uads.json`, `docs/UADS_REQUIREMENTS.md` and `docs/ACTIVE_TASKS.md` before substantial work. Keep the ordered task queue current and record actual verification evidence for affected requirements. Run `python scripts/validate-uads.py` using the same dependency as the Checks workflow.

@@ -1,0 +1,116 @@
+{
+  "uadsVersion": "sections-1-52",
+  "manifestVersion": 1,
+  "project": {
+    "name": "Fetch",
+    "repository": "Xarber/Fetch",
+    "profiles": [
+      "mobile-app",
+      "web-app",
+      "backend-service"
+    ],
+    "frameworks": [
+      "SwiftUI",
+      "TypeScript",
+      "FastAPI"
+    ],
+    "platforms": [
+      "ios",
+      "ipados",
+      "web",
+      "linux"
+    ],
+    "hosting": "X-Center"
+  },
+  "features": {
+    "pwa": "implemented",
+    "onboarding": "partial",
+    "developerOptions": "partial",
+    "screenshotRendering": "pending",
+    "serverSwitcher": "pending"
+  },
+  "distribution": {
+    "web": "deployed",
+    "ios": "workflow-artifacts",
+    "githubReleases": "unpublished"
+  },
+  "quality": {
+    "workflow": ".github/workflows/checks.yml",
+    "budgets": "config/performance-budgets.json"
+  },
+  "requirements": [
+    {
+      "id": "UADS-GIT-001",
+      "applicability": "required",
+      "state": "pending",
+      "evidence": []
+    },
+    {
+      "id": "UADS-CI-001",
+      "applicability": "required",
+      "state": "pending",
+      "evidence": []
+    },
+    {
+      "id": "UADS-UI-001",
+      "applicability": "required",
+      "state": "pending",
+      "evidence": []
+    },
+    {
+      "id": "UADS-UI-002",
+      "applicability": "required",
+      "state": "pending",
+      "evidence": []
+    },
+    {
+      "id": "UADS-DEV-001",
+      "applicability": "required",
+      "state": "pending",
+      "evidence": []
+    },
+    {
+      "id": "UADS-DEV-002",
+      "applicability": "required",
+      "state": "pending",
+      "evidence": []
+    },
+    {
+      "id": "UADS-DIST-001",
+      "applicability": "required",
+      "state": "pending",
+      "evidence": []
+    },
+    {
+      "id": "UADS-REL-001",
+      "applicability": "required",
+      "state": "pending",
+      "evidence": []
+    },
+    {
+      "id": "UADS-SEC-001",
+      "applicability": "required",
+      "state": "pending",
+      "evidence": []
+    },
+    {
+      "id": "UADS-OPS-001",
+      "applicability": "required",
+      "state": "pending",
+      "evidence": []
+    },
+    {
+      "id": "UADS-QA-001",
+      "applicability": "required",
+      "state": "pending",
+      "evidence": []
+    },
+    {
+      "id": "UADS-QA-002",
+      "applicability": "required",
+      "state": "pending",
+      "evidence": []
+    }
+  ],
+  "exceptions": []
+}

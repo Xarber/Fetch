@@ -1,0 +1,18 @@
+{
+  "web": {
+    "lcpMs": 2500,
+    "inpMs": 200,
+    "cls": 0.1,
+    "workspaceJsBytes": 100000
+  },
+  "backend": {
+    "healthP95Ms": 250
+  },
+  "native": {
+    "coldStartMs": 2500
+  },
+  "coverage": {
+    "changedLines": 0.8,
+    "changedBranches": 0.7
+  }
+}
