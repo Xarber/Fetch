@@ -15,7 +15,7 @@ for package in root.iterdir():
     if package.suffix not in ('.ipa','.zip'):continue
     device=package.suffix=='.ipa'
     with tempfile.TemporaryDirectory(prefix='fetch-validate-') as temp:
-        folder=Path(temp)
+        folder=Path(temp).resolve()
         with zipfile.ZipFile(package) as archive:
             for info in archive.infolist():
                 path=(folder/info.filename).resolve()
